@@ -37,8 +37,17 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/bookings', [AdminController::class, 'bookings'])->name('bookings');
     Route::post('/bookings/{booking}/confirm', [AdminController::class, 'confirmBooking'])->name('bookings.confirm');
     Route::post('/bookings/{booking}/cancel', [AdminController::class, 'cancelBooking'])->name('bookings.cancel');
+    
+    // Apartments Management
     Route::get('/apartments', [AdminController::class, 'apartments'])->name('apartments');
+    Route::get('/apartments/create', [AdminController::class, 'createApartment'])->name('apartments.create');
+    Route::post('/apartments', [AdminController::class, 'storeApartment'])->name('apartments.store');
+    Route::get('/apartments/{apartment}/edit', [AdminController::class, 'editApartment'])->name('apartments.edit');
+    Route::put('/apartments/{apartment}', [AdminController::class, 'updateApartment'])->name('apartments.update');
+    Route::delete('/apartments/{apartment}', [AdminController::class, 'destroyApartment'])->name('apartments.destroy');
+    Route::patch('/apartments/{apartment}/toggle-status', [AdminController::class, 'toggleStatus'])->name('apartments.toggle-status');
     Route::post('/apartments/{apartment}/block-dates', [AdminController::class, 'blockDates'])->name('apartments.block-dates');
+    Route::delete('/apartments/images/{image}', [AdminController::class, 'destroyImage'])->name('apartments.images.destroy');
 });
 
 require __DIR__.'/auth.php';

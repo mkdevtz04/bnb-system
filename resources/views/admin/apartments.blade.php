@@ -5,13 +5,27 @@
     <div class="max-w-7xl mx-auto px-4">
         <div class="flex items-center justify-between mb-8">
             <h1 class="text-4xl font-bold text-gray-900">Manage Apartments</h1>
-            <a 
-                href="{{ route('admin.dashboard') }}"
-                class="bg-gray-300 hover:bg-gray-400 text-gray-900 px-6 py-2 rounded-lg transition"
-            >
-                ← Back to Dashboard
-            </a>
+            <div class="flex space-x-4">
+                <a 
+                    href="{{ route('admin.dashboard') }}"
+                    class="bg-gray-300 hover:bg-gray-400 text-gray-900 px-6 py-2 rounded-lg transition flex items-center"
+                >
+                    ← Back to Dashboard
+                </a>
+                <a 
+                    href="{{ route('admin.apartments.create') }}"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition font-bold flex items-center"
+                >
+                    + Add Apartment
+                </a>
+            </div>
         </div>
+
+        @if(session('success'))
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-6" role="alert">
+                <span class="block sm:inline">{{ session('success') }}</span>
+            </div>
+        @endif
 
         <!-- Apartments Grid -->
         @if($apartments->count() > 0)
@@ -19,21 +33,34 @@
                 @foreach($apartments as $apartment)
                     <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden">
                         <!-- Image -->
-                        <div class="h-40 bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-                            <span class="text-5xl">🏢</span>
-                        </div>
+                        @if($apartment->images->count() > 0)
+                            <div class="h-40 bg-gray-200">
+                                <img src="{{ asset('storage/' . $apartment->images->first()->image_path) }}" alt="{{ $apartment->name }}" class="w-full h-full object-cover">
+                            </div>
+                        @else
+                            <div class="h-40 bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                                <span class="text-5xl">🏢</span>
+                            </div>
+                        @endif
 
                         <!-- Content -->
                         <div class="p-6">
                             <!-- Header -->
                             <div class="flex items-start justify-between mb-3">
                                 <div>
+                                    <div class="text-xs font-mono font-bold text-gray-500 mb-1">ID: #APT-{{ str_pad($apartment->id, 4, '0', STR_PAD_LEFT) }}</div>
                                     <h3 class="text-lg font-bold text-gray-900">{{ $apartment->name }}</h3>
                                     <p class="text-sm text-gray-600 capitalize">📍 {{ $apartment->floor }} Floor</p>
                                 </div>
-                                <span class="px-3 py-1 rounded-full text-xs font-bold {{ $apartment->status === 'available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                    {{ Str::upper($apartment->status) }}
-                                </span>
+                                
+                                <form action="{{ route('admin.apartments.toggle-status', $apartment->id) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to change the availability of this apartment?');">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="px-3 py-1 rounded-full text-xs font-bold transition hover:opacity-80 cursor-pointer {{ $apartment->status === 'available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800 shadow-sm border border-red-200' }}" title="Click to toggle availability">
+                                        {{ Str::upper($apartment->status) }} 
+                                        {!! $apartment->status === 'available' ? '✓' : '✗' !!}
+                                    </button>
+                                </form>
                             </div>
 
                             <!-- Details -->
@@ -56,18 +83,11 @@
                             <!-- Actions -->
                             <div class="space-y-2">
                                 <a 
-                                    href="{{ route('apartments.show', $apartment->id) }}"
-                                    class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition text-center block text-sm"
+                                    href="{{ route('admin.apartments.edit', $apartment->id) }}"
+                                    class="w-full bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-2 rounded-lg font-semibold transition text-center block text-sm"
                                 >
-                                    View Details
+                                    Edit Apartment
                                 </a>
-                                <button 
-                                    type="button"
-                                    class="w-full bg-gray-200 hover:bg-gray-300 text-gray-900 px-4 py-2 rounded-lg font-semibold transition text-center text-sm"
-                                    onclick="alert('Edit feature coming soon')"
-                                >
-                                    Edit
-                                </button>
                                 <button 
                                     type="button"
                                     class="w-full bg-amber-200 hover:bg-amber-300 text-amber-900 px-4 py-2 rounded-lg font-semibold transition text-center text-sm"
@@ -75,6 +95,16 @@
                                 >
                                     Block Dates
                                 </button>
+                                <form action="{{ route('admin.apartments.destroy', $apartment->id) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this apartment?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button 
+                                        type="submit"
+                                        class="w-full bg-red-100 hover:bg-red-200 text-red-800 px-4 py-2 rounded-lg font-semibold transition text-center text-sm"
+                                    >
+                                        Delete Apartment
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>

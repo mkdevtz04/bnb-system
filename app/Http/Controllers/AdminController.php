@@ -3,19 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Apartment;
+use App\Models\ApartmentImage;
 use App\Models\BlockedDate;
 use App\Models\Booking;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     */
-    public function __construct()
-    {
-        $this->middleware('admin');
-    }
 
     /**
      * Show admin dashboard
@@ -125,5 +120,129 @@ class AdminController extends Controller
         }
 
         return back()->with('success', 'Dates blocked successfully');
+    }
+
+    /**
+     * Show the form for creating a new apartment
+     */
+    public function createApartment()
+    {
+        return view('admin.apartments.create');
+    }
+
+    /**
+     * Store a newly created apartment
+     */
+    public function storeApartment(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'floor' => 'required|in:ground,upper',
+            'description' => 'required|string',
+            'price_per_night' => 'required|numeric|min:0',
+            'max_guests' => 'required|integer|min:1',
+            'bedrooms' => 'required|integer|min:0',
+            'bathrooms' => 'required|integer|min:0',
+            'status' => 'required|in:available,maintenance',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048'
+        ]);
+
+        $apartment = Apartment::create($validated);
+
+        // Handle image uploads
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $path = $image->store('apartments', 'public');
+                $apartment->images()->create([
+                    'image_path' => $path
+                ]);
+            }
+        }
+
+        return redirect()->route('admin.apartments')->with('success', 'Apartment created successfully!');
+    }
+
+    /**
+     * Show the form for editing the specified apartment
+     */
+    public function editApartment(Apartment $apartment)
+    {
+        return view('admin.apartments.edit', compact('apartment'));
+    }
+
+    /**
+     * Update the specified apartment
+     */
+    public function updateApartment(Request $request, Apartment $apartment)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'floor' => 'required|in:ground,upper',
+            'description' => 'required|string',
+            'price_per_night' => 'required|numeric|min:0',
+            'max_guests' => 'required|integer|min:1',
+            'bedrooms' => 'required|integer|min:0',
+            'bathrooms' => 'required|integer|min:0',
+            'status' => 'required|in:available,maintenance',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048'
+        ]);
+
+        $apartment->update($validated);
+
+        // Handle additional image uploads
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $path = $image->store('apartments', 'public');
+                $apartment->images()->create([
+                    'image_path' => $path
+                ]);
+            }
+        }
+
+        return redirect()->route('admin.apartments')->with('success', 'Apartment updated successfully!');
+    }
+
+    /**
+     * Remove the specified apartment from storage
+     */
+    public function destroyApartment(Apartment $apartment)
+    {
+        // Delete all images from storage
+        foreach ($apartment->images as $image) {
+            if (Storage::disk('public')->exists($image->image_path)) {
+                Storage::disk('public')->delete($image->image_path);
+            }
+        }
+        
+        $apartment->delete(); // This should cascade if foreign keys are set, otherwise bookings/images will be orphaned.
+
+        return redirect()->route('admin.apartments')->with('success', 'Apartment deleted successfully!');
+    }
+
+    /**
+     * Delete a specific image
+     */
+    public function destroyImage(ApartmentImage $image)
+    {
+        if (Storage::disk('public')->exists($image->image_path)) {
+            Storage::disk('public')->delete($image->image_path);
+        }
+        
+        $image->delete();
+
+        return back()->with('success', 'Image removed successfully!');
+    }
+
+    /**
+     * Toggle the status of an apartment (available vs maintenance)
+     */
+    public function toggleStatus(Apartment $apartment)
+    {
+        $newStatus = $apartment->status === 'available' ? 'maintenance' : 'available';
+        $apartment->update(['status' => $newStatus]);
+
+        $statusMessage = $newStatus === 'available' ? 'available for booking' : 'put into maintenance mode (hidden from guests)';
+        
+        return back()->with('success', "Apartment #{$apartment->id} has been {$statusMessage}.");
     }
 }
