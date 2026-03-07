@@ -144,7 +144,7 @@ class AdminController extends Controller
             'bedrooms' => 'required|integer|min:0',
             'bathrooms' => 'required|integer|min:0',
             'status' => 'required|in:available,maintenance',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048'
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120'
         ]);
 
         $apartment = Apartment::create($validated);
@@ -184,7 +184,7 @@ class AdminController extends Controller
             'bedrooms' => 'required|integer|min:0',
             'bathrooms' => 'required|integer|min:0',
             'status' => 'required|in:available,maintenance',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048'
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120'
         ]);
 
         $apartment->update($validated);

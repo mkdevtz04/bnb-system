@@ -19,9 +19,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Dashboard
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [ApartmentController::class, 'guestDashboard'])->name('dashboard');
 
     // Booking routes
     Route::get('/apartments/{apartment}/book', [BookingController::class, 'create'])->name('bookings.create');

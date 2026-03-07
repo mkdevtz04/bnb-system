@@ -60,8 +60,34 @@ class ApartmentController extends Controller
      */
     public function show(Apartment $apartment)
     {
-        $apartment->load('images', 'bookings');
+        $apartment->load(['images', 'bookings' => function($q) {
+            $q->whereIn('status', ['confirmed', 'pending']);
+        }, 'blockedDates']);
 
-        return view('apartments.show', compact('apartment'));
+        // Collect all booked/blocked dates
+        $unavailableDates = $apartment->blockedDates->pluck('date')->map(fn($d) => $d->format('Y-m-d'))->toArray();
+        
+        foreach($apartment->bookings as $booking) {
+            $period = new \DatePeriod(
+                new \DateTime($booking->check_in),
+                new \DateInterval('P1D'),
+                (new \DateTime($booking->check_out))
+            );
+            foreach($period as $date) {
+                $unavailableDates[] = $date->format('Y-m-d');
+            }
+        }
+
+        $unavailableDates = array_unique($unavailableDates);
+
+        return view('apartments.show', compact('apartment', 'unavailableDates'));
+    }
+    public function guestDashboard()
+    {
+        $apartments = Apartment::where('status', 'available')
+            ->with(['images'])
+            ->get();
+
+        return view('dashboard', compact('apartments'));
     }
 }
