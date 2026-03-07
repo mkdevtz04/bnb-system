@@ -1,74 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coastalcharmz – Your Trip Starts Here</title>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
+<x-app-layout>
+    @push('styles')
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        :root {
-            --blue: #1A6EFF;
-            --blue-dark: #1258d6;
-            --blue-light: #e8f0ff;
-            --gold: #F5A623;
-            --text: #1a1d23;
-            --muted: #6b7280;
-            --border: #e5e7eb;
-            --card-bg: #fff;
-            --bg: #f8f9fc;
-            --radius: 14px;
-            --shadow: 0 4px 24px rgba(26,110,255,0.08);
-            --shadow-hover: 0 8px 32px rgba(26,110,255,0.16);
-        }
-
-        body {
-            font-family: 'DM Sans', sans-serif;
-            color: var(--text);
-            background: #fff;
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        /* ─── NAVBAR ─── */
-        .navbar {
-            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 40px; height: 64px;
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border);
-            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-        }
-        .navbar-logo { display: flex; align-items: center; gap: 6px; text-decoration: none; }
-        .navbar-logo .logo-icon { width: 32px; height: 32px; background: var(--blue); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
-        .navbar-logo .logo-icon svg { width: 20px; height: 20px; fill: #fff; }
-        .navbar-logo span { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--blue); }
-        .navbar-logo span em { color: var(--gold); font-style: normal; }
-        .navbar-links { display: flex; align-items: center; gap: 28px; }
-        .navbar-links a { text-decoration: none; color: var(--muted); font-size: 14px; font-weight: 500; transition: color .2s; }
-        .navbar-links a:hover { color: var(--blue); }
-        .navbar-actions { display: flex; align-items: center; gap: 12px; }
-        .btn-ghost { background: none; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; color: var(--muted); padding: 8px 14px; border-radius: 8px; transition: background .2s; }
-        .btn-ghost:hover { background: var(--blue-light); color: var(--blue); }
-        .btn-primary { background: var(--blue); color: #fff; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; padding: 10px 22px; border-radius: 10px; transition: background .2s, transform .15s; }
-        .btn-primary:hover { background: var(--blue-dark); transform: translateY(-1px); }
-
-        /* ─── HERO ─── */
-        .hero {
-            margin-top: 64px;
-            position: relative;
-            min-height: 540px;
-            display: flex; align-items: center; justify-content: center;
-            overflow: hidden;
-            background: linear-gradient(135deg, #0a2540 0%, #1A6EFF 60%, #4f99ff 100%);
-        }
+        /* Hero and sections from welcome page... */
         .hero-bg-overlay {
             position: absolute; inset: 0;
             background-size: cover;
@@ -245,36 +179,7 @@
         .testimonial-stars { display: flex; justify-content: center; gap: 3px; margin-top: 8px; }
         .testimonial-stars i { color: var(--gold); font-size: 14px; }
 
-        /* ─── FOOTER ─── */
-        footer { background: #0d1b2e; color: rgba(255,255,255,0.7); padding: 60px 40px 30px; }
-        .footer-inner { max-width: 1200px; margin: 0 auto; }
-        .footer-top { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 48px; }
-        .footer-brand .footer-logo { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; text-decoration: none; }
-        .footer-brand .footer-logo span { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: #fff; }
-        .footer-brand p { font-size: 13px; line-height: 1.7; max-width: 220px; }
-        .footer-apps { display: flex; gap: 10px; margin-top: 20px; }
-        .store-btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 8px 14px; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: background .2s; }
-        .store-btn:hover { background: rgba(255,255,255,0.14); }
-        .store-btn i { font-size: 18px; color: #fff; }
-        .store-btn div { font-size: 10px; color: rgba(255,255,255,0.6); line-height: 1.3; }
-        .store-btn div strong { display: block; font-size: 13px; color: #fff; }
-        .footer-col h5 { font-size: 13px; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 16px; }
-        .footer-col ul { list-style: none; }
-        .footer-col ul li { margin-bottom: 10px; }
-        .footer-col ul li a { text-decoration: none; color: rgba(255,255,255,0.6); font-size: 13px; transition: color .2s; }
-        .footer-col ul li a:hover { color: #fff; }
-        .footer-col .phone { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 4px; }
-        .footer-col .email-link { font-size: 13px; color: var(--blue); text-decoration: none; }
-        .footer-social { display: flex; gap: 10px; margin-top: 16px; }
-        .social-btn { width: 36px; height: 36px; border-radius: 8px; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background .2s; text-decoration: none; color: rgba(255,255,255,0.7); }
-        .social-btn:hover { background: var(--blue); color: #fff; }
-        .footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 24px; display: flex; align-items: center; justify-content: space-between; }
-        .footer-bottom p { font-size: 12px; }
-        .footer-bottom-links { display: flex; gap: 20px; }
-        .footer-bottom-links a { font-size: 12px; color: rgba(255,255,255,0.5); text-decoration: none; }
-        .footer-bottom-links a:hover { color: #fff; }
-        .payment-icons { display: flex; gap: 8px; align-items: center; }
-        .pay-icon { background: rgba(255,255,255,0.1); border-radius: 4px; padding: 4px 10px; font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.7); }
+        .testimonial-stars i { color: var(--gold); font-size: 14px; }
 
         /* ─── CAROUSEL ARROWS ─── */
         .section-nav { display: flex; gap: 8px; }
@@ -385,42 +290,7 @@
         .modal-step.active { display: block; animation: stepFadeIn .3s; }
         @keyframes stepFadeIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
     </style>
-</head>
-<body>
-
-{{-- ═══════════════════ NAVBAR ═══════════════════ --}}
-<nav class="navbar">
-    <a href="{{ url('/') }}" class="navbar-logo">
-        <div class="logo-icon">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/>
-            </svg>
-        </div>
-        <span>Coastal<em>Charmz</em></span>
-    </a>
-
-    <div class="navbar-links">
-        <a href="#">Our Apartments</a>
-        <a href="#">Amenities</a>
-        <a href="#">Gallery</a>
-        <a href="#">Neighborhood</a>
-        <a href="#">Contact Host</a>
-    </div>
-
-    <div class="navbar-actions">
-        <button class="btn-ghost"><i class="fa-regular fa-circle-question"></i> Help</button>
-        @auth
-            <a href="{{ route('dashboard') }}" class="btn-primary">Dashboard</a>
-            <form method="POST" action="{{ route('logout') }}" style="display: inline;">
-                @csrf
-                <button type="submit" class="btn-ghost" style="color: #e74c3c;">Logout</button>
-            </form>
-        @else
-            <a class="btn-primary" href="{{ route('login') }}">Login</a>
-            <button class="btn-primary" onclick="openAuthModal()">Sign Up/Login</button>
-        @endauth
-    </div>
-</nav>
+    @endpush
 
 {{-- ═══════════════════ HERO ═══════════════════ --}}
 <section class="hero">
@@ -617,326 +487,251 @@
     </div>
 </section>
 
-{{-- ═══════════════════ FOOTER ═══════════════════ --}}
-<footer>
-    <div class="footer-inner">
-        <div class="footer-top">
-            <div class="footer-brand">
-                <a href="{{ url('/') }}" class="footer-logo">
-                    <span>coastalcharmz</span>
-                </a>
-                <p>Find and book premium, fully-furnished apartments curated by an experienced host to make your stay unforgettable.</p>
-                <div class="footer-apps">
-                    <div class="store-btn"><i class="fab fa-apple"></i><div>Download on the<strong>App Store</strong></div></div>
-                    <div class="store-btn"><i class="fab fa-google-play"></i><div>Get it on<strong>Google Play</strong></div></div>
-                </div>
-            </div>
+    @push('scripts')
+    <script>
+        // Scroll animation observer
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
 
-            <div class="footer-col">
-                <h5>Our Apartments</h5>
-                <ul>
-                    <li><a href="#">The Cozy Reading Room</a></li>
-                    <li><a href="#">The Dining Suite</a></li>
-                    <li><a href="#">The Yellow Lamp Loft</a></li>
-                    <li><a href="#">The Executive Workspace</a></li>
-                    <li><a href="#">Residential Area View</a></li>
-                    <li><a href="#">Luxury Decor Penthouse</a></li>
-                </ul>
-            </div>
-
-            <div class="footer-col">
-                <h5>Resources</h5>
-                <ul>
-                    <li><a href="#">About the Host</a></li>
-                    <li><a href="#">Neighborhood Guide</a></li>
-                    <li><a href="#">Check-in Instructions</a></li>
-                    <li><a href="#">House Rules</a></li>
-                    <li><a href="#">FAQ</a></li>
-                    <li><a href="#">Reviews</a></li>
-                </ul>
-            </div>
-
-            <div class="footer-col">
-                <h5>Support</h5>
-                <ul>
-                    <li><a href="#">Help Center</a></li>
-                    <li><a href="#">Cancellation Policy</a></li>
-                    <li><a href="#">Contact Host</a></li>
-                </ul>
-            </div>
-
-            <div class="footer-col">
-                <h5>Get in Touch</h5>
-                <div class="phone">+1 (800) 123-456</div>
-                <a href="mailto:support@Coastalcharmz.com" class="email-link">support@Coastalcharmz.com</a>
-                <div class="footer-social">
-                    <a href="#" class="social-btn"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" class="social-btn"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="social-btn"><i class="fab fa-instagram"></i></a>
-                    <a href="#" class="social-btn"><i class="fab fa-linkedin-in"></i></a>
-                </div>
-            </div>
-        </div>
-
-        <div class="footer-bottom">
-            <p>&copy; {{ date('Y') }} Coastalcharmz. All rights reserved.</p>
-            <div class="footer-bottom-links">
-                <a href="#">Privacy Policy</a>
-                <a href="#">Terms of Service</a>
-                <a href="#">Cookie Policy</a>
-            </div>
-            <div class="payment-icons">
-                <span class="pay-icon">VISA</span>
-                <span class="pay-icon">MC</span>
-                <span class="pay-icon">AMEX</span>
-                <span class="pay-icon">PayPal</span>
-            </div>
-        </div>
-    </div>
-</footer>
-
-<script>
-    // Scroll animation observer
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
-    }, { threshold: 0.1 });
-    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
-
-    // Filter tabs
-    document.querySelectorAll('.filter-tab').forEach(tab => {
-        tab.addEventListener('click', function() {
-            this.closest('.filter-tabs').querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
-        });
-    });
-
-    // Search tabs
-    document.querySelectorAll('.search-tab').forEach(tab => {
-        tab.addEventListener('click', function() {
-            document.querySelectorAll('.search-tab').forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
-        });
-    });
-
-    // Favourite toggle
-    document.querySelectorAll('.deal-fav').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const icon = this.querySelector('i');
-            icon.classList.toggle('fa-regular');
-            icon.classList.toggle('fa-solid');
-        });
-    });
-
-    // Auth Modal Logic
-    let authOverlay, step1, step2, emailInput, displayEmail, btnContinueEmail, otpInputs;
-
-    document.addEventListener('DOMContentLoaded', () => {
-        authOverlay = document.getElementById('authOverlay');
-        step1 = document.getElementById('authStep1');
-        step2 = document.getElementById('authStep2');
-        emailInput = document.getElementById('authEmail');
-        displayEmail = document.getElementById('displayEmail');
-        btnContinueEmail = document.getElementById('btnContinueEmail');
-
-        // Close on overlay click
-        authOverlay.addEventListener('click', (e) => {
-            if (e.target === authOverlay) window.closeAuthModal();
+        // Filter tabs
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                this.closest('.filter-tabs').querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+            });
         });
 
-        // Enable button based on input
-        emailInput.addEventListener('input', (e) => {
-            btnContinueEmail.disabled = e.target.value.trim() === '';
+        // Search tabs
+        document.querySelectorAll('.search-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.search-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+            });
         });
 
-        // OTP Input Logic
-        otpInputs = document.querySelectorAll('.otp-inputs input');
-        otpInputs.forEach((input, index) => {
-            input.addEventListener('keyup', (e) => {
-                if (e.key >= 0 && e.key <= 9) {
-                    if (index < otpInputs.length - 1) {
-                        otpInputs[index + 1].focus();
-                    } else {
-                        // All filled, pretend to confirm code...
-                        const code = Array.from(otpInputs).map(i => i.value).join('');
-                        if(code.length === 4) {
-                            window.confirmOtp();
+        // Favourite toggle
+        document.querySelectorAll('.deal-fav').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const icon = this.querySelector('i');
+                icon.classList.toggle('fa-regular');
+                icon.classList.toggle('fa-solid');
+            });
+        });
+
+        // Auth Modal Logic
+        let authOverlay, step1, step2, emailInput, displayEmail, btnContinueEmail, otpInputs;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            authOverlay = document.getElementById('authOverlay');
+            step1 = document.getElementById('authStep1');
+            step2 = document.getElementById('authStep2');
+            emailInput = document.getElementById('authEmail');
+            displayEmail = document.getElementById('displayEmail');
+            btnContinueEmail = document.getElementById('btnContinueEmail');
+
+            // Close on overlay click
+            if (authOverlay) {
+                authOverlay.addEventListener('click', (e) => {
+                    if (e.target === authOverlay) window.closeAuthModal();
+                });
+            }
+
+            // Enable button based on input
+            if (emailInput) {
+                emailInput.addEventListener('input', (e) => {
+                    btnContinueEmail.disabled = e.target.value.trim() === '';
+                });
+            }
+
+            // OTP Input Logic
+            otpInputs = document.querySelectorAll('.otp-inputs input');
+            otpInputs.forEach((input, index) => {
+                input.addEventListener('keyup', (e) => {
+                    if (e.key >= 0 && e.key <= 9) {
+                        if (index < otpInputs.length - 1) {
+                            otpInputs[index + 1].focus();
+                        } else {
+                            // All filled, pretend to confirm code...
+                            const code = Array.from(otpInputs).map(i => i.value).join('');
+                            if(code.length === 4) {
+                                window.confirmOtp();
+                            }
+                        }
+                    } else if (e.key === 'Backspace') {
+                        if (index > 0 && input.value === '') {
+                            otpInputs[index - 1].focus();
                         }
                     }
-                } else if (e.key === 'Backspace') {
-                    if (index > 0 && input.value === '') {
-                        otpInputs[index - 1].focus();
-                    }
-                }
+                });
             });
         });
-    });
 
-    window.openAuthModal = function() {
-        if (!authOverlay) return;
-        authOverlay.classList.add('active');
-        step1.classList.add('active');
-        step2.classList.remove('active');
-        emailInput.value = '';
-        btnContinueEmail.disabled = true;
-    };
-
-    window.closeAuthModal = function() {
-        if (!authOverlay) return;
-        authOverlay.classList.remove('active');
-        setTimeout(() => {
-            step1.classList.remove('active');
+        window.openAuthModal = function() {
+            if (!authOverlay) return;
+            authOverlay.classList.add('active');
+            step1.classList.add('active');
             step2.classList.remove('active');
-        }, 300);
-    };
+            emailInput.value = '';
+            btnContinueEmail.disabled = true;
+        };
 
-    window.goStep2 = async function() {
-        const email = emailInput.value.trim();
-        if (!email) return;
-
-        btnContinueEmail.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
-        btnContinueEmail.disabled = true;
-
-        try {
-            const res = await fetch('/auth/otp/send', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({ email: email })
-            });
-
-            const data = await res.json();
-            btnContinueEmail.innerHTML = 'Continue with email';
-            btnContinueEmail.disabled = false;
-
-            if (res.ok && data.success) {
+        window.closeAuthModal = function() {
+            if (!authOverlay) return;
+            authOverlay.classList.remove('active');
+            setTimeout(() => {
                 step1.classList.remove('active');
-                step2.classList.add('active');
-                displayEmail.innerText = email;
-                if (otpInputs) {
-                    otpInputs.forEach(i => i.value = '');
-                    setTimeout(() => otpInputs[0].focus(), 100);
+                step2.classList.remove('active');
+            }, 300);
+        };
+
+        window.goStep2 = async function() {
+            const email = emailInput.value.trim();
+            if (!email) return;
+
+            btnContinueEmail.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
+            btnContinueEmail.disabled = true;
+
+            try {
+                const res = await fetch('/auth/otp/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({ email: email })
+                });
+
+                const data = await res.json();
+                btnContinueEmail.innerHTML = 'Continue with email';
+                btnContinueEmail.disabled = false;
+
+                if (res.ok && data.success) {
+                    step1.classList.remove('active');
+                    step2.classList.add('active');
+                    displayEmail.innerText = email;
+                    if (otpInputs) {
+                        otpInputs.forEach(i => i.value = '');
+                        setTimeout(() => otpInputs[0].focus(), 100);
+                    }
+                } else {
+                    alert(data.message || 'Error sending code.');
                 }
-            } else {
-                alert(data.message || 'Error sending code.');
+            } catch (error) {
+                btnContinueEmail.innerHTML = 'Continue with email';
+                btnContinueEmail.disabled = false;
+                alert('Something went wrong. Please try again.');
+                console.error(error);
             }
-        } catch (error) {
-            btnContinueEmail.innerHTML = 'Continue with email';
-            btnContinueEmail.disabled = false;
-            alert('Something went wrong. Please try again.');
-            console.error(error);
-        }
-    };
+        };
 
-    window.confirmOtp = async function() {
-        const btnConfirmCode = document.getElementById('btnConfirmCode');
-        const code = Array.from(otpInputs).map(i => i.value).join('');
-        
-        if (code.length !== 4) return;
-        
-        const originalText = btnConfirmCode.innerHTML;
-        if(btnConfirmCode) btnConfirmCode.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Confirming...';
+        window.confirmOtp = async function() {
+            const btnConfirmCode = document.getElementById('btnConfirmCode');
+            const code = Array.from(otpInputs).map(i => i.value).join('');
+            
+            if (code.length !== 4) return;
+            
+            const originalText = btnConfirmCode.innerHTML;
+            if(btnConfirmCode) btnConfirmCode.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Confirming...';
 
-        try {
-            const res = await fetch('/auth/otp/verify', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({ email: emailInput.value.trim(), code: code })
-            });
+            try {
+                const res = await fetch('/auth/otp/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({ email: emailInput.value.trim(), code: code })
+                });
 
-            const data = await res.json();
+                const data = await res.json();
 
-            if (res.ok && data.success) {
-                window.location.href = data.redirect; // Laravel controller decides dashboard vs admin
-            } else {
+                if (res.ok && data.success) {
+                    window.location.href = data.redirect;
+                } else {
+                    if(btnConfirmCode) btnConfirmCode.innerHTML = originalText;
+                    alert(data.message || 'Invalid code. Please try again.');
+                }
+            } catch (error) {
                 if(btnConfirmCode) btnConfirmCode.innerHTML = originalText;
-                alert(data.message || 'Invalid code. Please try again.');
+                alert('Something went wrong verifying the code.');
+                console.error(error);
             }
-        } catch (error) {
-            if(btnConfirmCode) btnConfirmCode.innerHTML = originalText;
-            alert('Something went wrong verifying the code.');
-            console.error(error);
-        }
-    };
+        };
+    </script>
+    @endpush
 
-</script>
-
-{{-- ═══════════════════ AUTH MODAL HTML ═══════════════════ --}}
-<div class="auth-modal-overlay" id="authOverlay">
-    <div class="auth-modal">
-        <!-- STEP 1: Email / Social -->
-        <div class="modal-step active" id="authStep1">
-            <div class="auth-header">
-                <button class="auth-close" onclick="closeAuthModal()"><i class="fa-solid fa-xmark"></i></button>
-                <h3>Sign in or sign up</h3>
-            </div>
-            <div class="auth-body">
-                <h2 class="auth-title">Welcome to CoastalCharmz</h2>
-
-                <div class="form-group">
-                    <label>Email address</label>
-                    <input type="email" id="authEmail" placeholder="e.g., mail@example.com" autocomplete="email">
+    {{-- ═══════════════════ AUTH MODAL HTML ═══════════════════ --}}
+    <div class="auth-modal-overlay" id="authOverlay">
+        <div class="auth-modal">
+            <!-- STEP 1: Email / Social -->
+            <div class="modal-step active" id="authStep1">
+                <div class="auth-header">
+                    <button class="auth-close" onclick="closeAuthModal()"><i class="fa-solid fa-xmark"></i></button>
+                    <h3>Sign in or sign up</h3>
                 </div>
+                <div class="auth-body">
+                    <h2 class="auth-title">Welcome to CoastalCharmz</h2>
 
-                <button class="btn-auth btn-auth-primary" id="btnContinueEmail" disabled onclick="goStep2()">
-                    Continue with email
-                </button>
+                    <div class="form-group">
+                        <label>Email address</label>
+                        <input type="email" id="authEmail" placeholder="e.g., mail@example.com" autocomplete="email">
+                    </div>
 
-                <div class="auth-divider">or</div>
-
-                <div style="display: flex; justify-content: space-between; gap: 16px;">
-                    <a href="{{ route('login') }}" class="btn-auth btn-auth-social" style="flex:1; text-decoration:none;" title="Continue with password">
-                        <i class="fa-solid fa-key"></i>
-                    </a>
-
-                    <button class="btn-auth btn-auth-social" style="flex:1" title="Continue with Google">
-                        <i class="fa-brands fa-google" style="color:#DB4437;"></i>
+                    <button class="btn-auth btn-auth-primary" id="btnContinueEmail" disabled onclick="goStep2()">
+                        Continue with email
                     </button>
-                    <button class="btn-auth btn-auth-social btn-apple" style="flex:1" title="Continue with Apple">
-                        <i class="fa-brands fa-apple"></i>
-                    </button>
-                    <button class="btn-auth btn-auth-social" style="flex:1" title="Continue with Facebook">
-                        <i class="fa-brands fa-facebook" style="color:#1877F2;"></i>
-                    </button>
-                </div>
-                
-                <div class="auth-footer">
-                    By moving forward, you agree to our <a href="#">Terms of Use</a> and <a href="#">Privacy Policy</a>.
+
+                    <div class="auth-divider">or</div>
+
+                    <div style="display: flex; justify-content: space-between; gap: 16px;">
+                        <a href="{{ route('login') }}" class="btn-auth btn-auth-social" style="flex:1; text-decoration:none;" title="Continue with password">
+                            <i class="fa-solid fa-key"></i>
+                        </a>
+
+                        <button class="btn-auth btn-auth-social" style="flex:1" title="Continue with Google">
+                            <i class="fa-brands fa-google" style="color:#DB4437;"></i>
+                        </button>
+                        <button class="btn-auth btn-auth-social btn-apple" style="flex:1" title="Continue with Apple">
+                            <i class="fa-brands fa-apple"></i>
+                        </button>
+                        <button class="btn-auth btn-auth-social" style="flex:1" title="Continue with Facebook">
+                            <i class="fa-brands fa-facebook" style="color:#1877F2;"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="auth-footer">
+                        By moving forward, you agree to our <a href="#">Terms of Use</a> and <a href="#">Privacy Policy</a>.
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- STEP 2: OTP Verification -->
-        <div class="modal-step" id="authStep2">
-            <div class="auth-header">
-                <button class="auth-close" onclick="document.getElementById('authStep2').classList.remove('active'); document.getElementById('authStep1').classList.add('active');"><i class="fa-solid fa-chevron-left"></i></button>
-                <h3>Let's confirm it's you</h3>
-            </div>
-            <div class="auth-body" style="padding-top:20px; text-align:center;">
-                <h2 style="font-size:18px; font-weight:700; margin-bottom:12px;">Enter your verification code</h2>
-                <p class="otp-sub">We've sent a 4-digit code to:<br><strong id="displayEmail">mail@example.com</strong></p>
-
-                <div class="otp-inputs">
-                    <input type="text" maxlength="1" placeholder="-" />
-                    <input type="text" maxlength="1" placeholder="-" />
-                    <input type="text" maxlength="1" placeholder="-" />
-                    <input type="text" maxlength="1" placeholder="-" />
+            <!-- STEP 2: OTP Verification -->
+            <div class="modal-step" id="authStep2">
+                <div class="auth-header">
+                    <button class="auth-close" onclick="document.getElementById('authStep2').classList.remove('active'); document.getElementById('authStep1').classList.add('active');"><i class="fa-solid fa-chevron-left"></i></button>
+                    <h3>Let's confirm it's you</h3>
                 </div>
+                <div class="auth-body" style="padding-top:20px; text-align:center;">
+                    <h2 style="font-size:18px; font-weight:700; margin-bottom:12px;">Enter your verification code</h2>
+                    <p class="otp-sub">We've sent a 4-digit code to:<br><strong id="displayEmail">mail@example.com</strong></p>
 
-                <span class="resend-link">Get a new code</span>
+                    <div class="otp-inputs">
+                        <input type="text" maxlength="1" placeholder="-" />
+                        <input type="text" maxlength="1" placeholder="-" />
+                        <input type="text" maxlength="1" placeholder="-" />
+                        <input type="text" maxlength="1" placeholder="-" />
+                    </div>
 
-                <button class="btn-auth btn-auth-primary" id="btnConfirmCode" onclick="confirmOtp()">
-                    Continue
-                </button>
+                    <span class="resend-link">Get a new code</span>
+
+                    <button class="btn-auth btn-auth-primary" id="btnConfirmCode" onclick="confirmOtp()">
+                        Continue
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-</div>
-
-</body>
-</html>
+</x-app-layout>

@@ -1,17 +1,6 @@
 <x-app-layout>
+    @push('styles')
     <style>
-        :root {
-            --blue: #1A6EFF;
-            --blue-dark: #1258d6;
-            --blue-light: #e8f0ff;
-            --gold: #F5A623;
-            --text: #1a1d23;
-            --muted: #6b7280;
-            --border: #e5e7eb;
-            --bg: #f8f9fc;
-            --radius: 20px;
-            --shadow: 0 4px 24px rgba(26,110,255,0.08);
-        }
 
         .show-container {
             padding: 40px 20px;
@@ -185,6 +174,7 @@
             .show-grid { grid-template-columns: 1fr; }
         }
     </style>
+    @endpush
 
     <div class="show-container">
         <div class="show-grid">
