@@ -48,7 +48,7 @@
 
             <div class="footer-col">
                 <h5>Get in Touch</h5>
-                <div class="phone">+1 (800) 123-456</div>
+                <div class="phone">+255626267471</div>
                 <a href="mailto:support@Coastalcharmz.com" class="email-link">support@Coastalcharmz.com</a>
                 <div class="footer-social">
                     <a href="#" class="social-btn-premium"><i class="fab fa-facebook-f"></i></a>
