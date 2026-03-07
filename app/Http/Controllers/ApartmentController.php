@@ -45,6 +45,10 @@ class ApartmentController extends Controller
             });
         }
 
+        if ($request->has('apartment_id') && $request->input('apartment_id')) {
+            $query->where('id', $request->input('apartment_id'));
+        }
+
         if ($request->has('guests') && $request->input('guests')) {
             $guests = (int) $request->input('guests');
             $query->where('max_guests', '>=', $guests);

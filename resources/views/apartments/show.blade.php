@@ -192,9 +192,11 @@
             {{-- Left Column --}}
             <div class="main-content">
                 <div class="show-header">
-                    <a href="{{ route('dashboard') }}" style="color:var(--blue); text-decoration:none; font-size:14px; font-weight:600; margin-bottom:16px; display:inline-block;">
-                        <i class="fa-solid fa-chevron-left"></i> Back to Apartments
-                    </a>
+                    @auth
+                        <a href="{{ Auth::user()->role == 'admin' ? route('admin.dashboard') : route('dashboard') }}" style="color:var(--blue); text-decoration:none; font-size:14px; font-weight:600; margin-bottom:16px; display:inline-block;">
+                            <i class="fa-solid fa-chevron-left"></i> Back to Apartments
+                        </a>
+                    @endauth
                     <h1>{{ $apartment->name }}</h1>
                     <div class="location">
                         <i class="fa-solid fa-location-dot"></i>

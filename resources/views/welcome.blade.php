@@ -409,8 +409,16 @@
 
     <div class="navbar-actions">
         <button class="btn-ghost"><i class="fa-regular fa-circle-question"></i> Help</button>
-        <button class="btn-ghost" onclick="openAuthModal()">Login</button>
-        <button class="btn-primary" onclick="openAuthModal()">Sign Up</button>
+        @auth
+            <a href="{{ route('dashboard') }}" class="btn-primary">Dashboard</a>
+            <form method="POST" action="{{ route('logout') }}" style="display: inline;">
+                @csrf
+                <button type="submit" class="btn-ghost" style="color: #e74c3c;">Logout</button>
+            </form>
+        @else
+            <a class="btn-primary" href="{{ route('login') }}">Login</a>
+            <button class="btn-primary" onclick="openAuthModal()">Sign Up/Login</button>
+        @endauth
     </div>
 </nav>
 
@@ -423,34 +431,36 @@
         <p>Discover our exclusive fully-furnished premium apartments</p>
 
         <div class="search-box">
-            <div class="search-fields" style="grid-template-columns: 2fr 1.5fr 1.5fr 1.5fr auto;">
-                <div class="search-field">
-                    <label>Select Apartment</label>
-                    <select>
-                        <option>All Apartments</option>
-                        <option>The Grand Penthouse</option>
-                        <option>Oceanview Suite</option>
-                        <option>Downtown Loft</option>
-                    </select>
+            <form action="{{ route('apartments.search') }}" method="GET">
+                <div class="search-fields" style="grid-template-columns: 2fr 1.5fr 1.5fr 1.5fr auto;">
+                    <div class="search-field">
+                        <label>Select Apartment</label>
+                        <select name="apartment_id">
+                            <option value="">All Apartments</option>
+                            @foreach($apartments as $apt)
+                                <option value="{{ $apt->id }}">{{ $apt->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="search-field">
+                        <label>Check In</label>
+                        <input type="date" name="check_in" required>
+                    </div>
+                    <div class="search-field">
+                        <label>Check Out</label>
+                        <input type="date" name="check_out" required>
+                    </div>
+                    <div class="search-field">
+                        <label>Guests</label>
+                        <select name="guests">
+                            <option value="2">1-2 Guests</option>
+                            <option value="4">3-4 Guests</option>
+                            <option value="6">5+ Guests</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-search"><i class="fa-solid fa-calendar-check"></i> Check Availability</button>
                 </div>
-                <div class="search-field">
-                    <label>Check In</label>
-                    <input type="date">
-                </div>
-                <div class="search-field">
-                    <label>Check Out</label>
-                    <input type="date">
-                </div>
-                <div class="search-field">
-                    <label>Guests</label>
-                    <select>
-                        <option>1-2 Guests</option>
-                        <option>3-4 Guests</option>
-                        <option>5+ Guests</option>
-                    </select>
-                </div>
-                <button class="btn-search"><i class="fa-solid fa-calendar-check"></i> Check Availability</button>
-            </div>
+            </form>
         </div>
     </div>
 </section>
@@ -498,27 +508,33 @@
         </div>
 
         <div class="dest-grid">
-            @php
-                $apartments = [
-                    ['name' => 'The Cozy Reading Room', 'desc' => '1 Bed • 1 Bath', 'badge' => 'Popular', 'image' => 'bookshelf-with-pouf.jpg'],
-                    ['name' => 'The Dining Suite', 'desc' => '2 Beds • 2 Baths', 'badge' => null, 'image' => 'dining-table.jpg'],
-                    ['name' => 'The Yellow Lamp Loft', 'desc' => 'Studio • 1 Bath', 'badge' => null, 'image' => 'yellow-lamp.jpg'],
-                    ['name' => 'The Executive Workspace', 'desc' => '1 Bed • 1 Bath • Office', 'badge' => 'New', 'image' => 'working-table.jpg'],
-                ];
-            @endphp
-
-            @foreach($apartments as $i => $apt)
-            <div class="dest-card fade-up" style="transition-delay:{{ $i * 0.1 }}s">
-                <img src="{{ asset('images/' . $apt['image']) }}" class="dest-card-img" alt="{{ $apt['name'] }}" style="width: 100%; height: 100%; object-fit: cover; display: block;">
-                @if($apt['badge'])
-                <div class="dest-badge">{{ $apt['badge'] }}</div>
+            @forelse($apartments as $i => $apt)
+            <a href="{{ route('apartments.show', $apt->id) }}" class="dest-card fade-up" style="transition-delay:{{ $i * 0.1 }}s; text-decoration: none;">
+                @if($apt->images->count() > 0)
+                    <img src="{{ asset('storage/' . $apt->images->first()->image_path) }}" class="dest-card-img" alt="{{ $apt->name }}" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+                @else
+                    <div class="dest-card-placeholder">
+                        <i class="fa-solid fa-building"></i>
+                    </div>
                 @endif
+                
+                @if($i == 0)
+                    <div class="dest-badge">Popular</div>
+                @elseif($i == 1)
+                    <div class="dest-badge">New</div>
+                @endif
+
                 <div class="dest-card-overlay">
-                    <h3>{{ $apt['name'] }}</h3>
-                    <p>{{ $apt['desc'] }}</p>
+                    <h3>{{ $apt->name }}</h3>
+                    <p>{{ ucwords($apt->floor) }} Floor • {{ $apt->bedrooms }} Bed • {{ $apt->bathrooms }} Bath</p>
                 </div>
-            </div>
-            @endforeach
+            </a>
+            @empty
+                <div style="grid-column: span 4; text-align: center; padding: 40px; background: var(--blue-light); border-radius: 12px; color: var(--blue);">
+                    <i class="fa-solid fa-hotel fa-3x" style="margin-bottom: 16px; opacity: 0.5;"></i>
+                    <p>No apartments registered yet. Please check back later!</p>
+                </div>
+            @endforelse
         </div>
     </div>
 </section>
@@ -540,38 +556,34 @@
         </div>
 
         <div class="deals-grid">
-            @php
-                $deals = [
-                    ['name' => 'Residential Area View', 'location' => 'City Center', 'rating' => 4.9, 'price' => 175, 'old' => 220, 'status' => 'available', 'image' => 'residential-area.jpg'],
-                    ['name' => 'The Bookshelf Suite', 'location' => 'Downtown', 'rating' => 4.7, 'price' => 140, 'old' => 180, 'status' => 'limited', 'image' => 'table-bookshelf.jpg'],
-                    ['name' => 'Luxury Decor Penthouse', 'location' => 'Uptown', 'rating' => 4.8, 'price' => 315, 'old' => 390, 'status' => 'available', 'image' => 'luxury-decor.jpg'],
-                    ['name' => 'Grand Dining Apartment', 'location' => 'City Center', 'rating' => 5.0, 'price' => 280, 'old' => 310, 'status' => 'limited', 'image' => 'dining-table.jpg'],
-                ];
-            @endphp
-
-            @foreach($deals as $i => $deal)
-            <div class="deal-card fade-up" style="transition-delay:{{ $i * 0.1 }}s">
+            @foreach($apartments->take(4) as $i => $apt)
+            <a href="{{ route('apartments.show', $apt->id) }}" class="deal-card fade-up" style="transition-delay:{{ $i * 0.1 }}s; text-decoration: none;">
                 <div class="deal-img-wrap">
-                    <img src="{{ asset('images/' . $deal['image']) }}" style="width: 100%; height: 100%; object-fit: cover;" alt="{{ $deal['name'] }}">
+                    @if($apt->images->count() > 0)
+                        <img src="{{ asset('storage/' . $apt->images->first()->image_path) }}" style="width: 100%; height: 100%; object-fit: cover;" alt="{{ $apt->name }}">
+                    @else
+                        <div class="deal-img-placeholder">
+                            <i class="fa-solid fa-building"></i>
+                        </div>
+                    @endif
                     <div class="deal-fav"><i class="fa-solid fa-heart"></i></div>
-                    <span class="deal-status {{ $deal['status'] === 'available' ? 'status-available' : 'status-limited' }}">
-                        {{ $deal['status'] === 'available' ? 'Available' : 'Limited' }}
+                    <span class="deal-status status-available">
+                        Available
                     </span>
                 </div>
                 <div class="deal-body">
-                    <h3>{{ $deal['name'] }}</h3>
-                    <div class="deal-location"><i class="fa-solid fa-map-pin"></i> {{ $deal['location'] }}</div>
+                    <h3>{{ $apt->name }}</h3>
+                    <div class="deal-location"><i class="fa-solid fa-map-pin"></i> {{ $apt->floor }} Floor • Central</div>
                     <div class="deal-footer">
                         <div class="deal-rating">
-                            <i class="fa-solid fa-star"></i> {{ $deal['rating'] }}
+                            <i class="fa-solid fa-star"></i> 5.0
                         </div>
                         <div class="deal-price">
-                            <del style="color:#ccc; font-size:12px">${{ $deal['old'] }}</del>
-                            <strong> ${{ $deal['price'] }}</strong><span style="font-size:11px; color:var(--muted)">/night</span>
+                            <strong> ${{ number_format($apt->price_per_night) }}</strong><span style="font-size:11px; color:var(--muted)">/night</span>
                         </div>
                     </div>
                 </div>
-            </div>
+            </a>
             @endforeach
         </div>
     </div>
