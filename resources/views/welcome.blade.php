@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -300,8 +301,88 @@
         }
 
         /* ─── ANIMATIONS ─── */
-        .fade-up { opacity: 0; transform: translateY(30px); transition: opacity .6s ease, transform .6s ease; }
-        .fade-up.visible { opacity: 1; transform: none; }
+        /* ─── AUTH MODAL ─── */
+        .auth-modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+            z-index: 2000;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden; transition: opacity .3s, visibility .3s;
+        }
+        .auth-modal-overlay.active { opacity: 1; visibility: visible; }
+        .auth-modal {
+            background: #fff; border-radius: 20px;
+            width: 100%; max-width: 440px;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.2);
+            transform: translateY(20px) scale(0.98);
+            transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .auth-modal-overlay.active .auth-modal { transform: translateY(0) scale(1); }
+        .auth-header {
+            display: flex; align-items: center; justify-content: center;
+            padding: 16px; border-bottom: 1px solid var(--border);
+            position: relative;
+        }
+        .auth-header h3 { font-size: 16px; font-weight: 700; }
+        .auth-close {
+            position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+            background: none; border: none; font-size: 16px; color: var(--muted);
+            cursor: pointer; width: 32px; height: 32px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            transition: background .2s;
+        }
+        .auth-close:hover { background: var(--bg); color: var(--text); }
+        .auth-body { padding: 32px; }
+        .auth-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; margin-bottom: 24px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text); }
+        .form-group input {
+            width: 100%; padding: 14px 16px; border: 1.5px solid var(--border);
+            border-radius: 12px; font-family: 'DM Sans', sans-serif; font-size: 15px;
+            outline: none; transition: border-color .2s;
+        }
+        .form-group input:focus { border-color: var(--blue); }
+        .btn-auth {
+            width: 100%; padding: 14px; border: none; border-radius: 12px;
+            font-size: 15px; font-weight: 600; cursor: pointer;
+            font-family: 'DM Sans', sans-serif; transition: background .2s, transform .2s;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-auth-primary { background: var(--blue); color: #fff; margin-bottom: 24px; }
+        .btn-auth-primary:hover { background: var(--blue-dark); }
+        .btn-auth-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+        .auth-divider {
+            display: flex; align-items: center; text-align: center; margin-bottom: 24px;
+            color: var(--muted); font-size: 13px;
+        }
+        .auth-divider::before, .auth-divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border); }
+        .auth-divider::before { margin-right: 12px; }
+        .auth-divider::after { margin-left: 12px; }
+        .btn-auth-social { background: #fff; border: 1.5px solid var(--border); color: var(--text); margin-bottom: 16px; font-weight: 500; }
+        .btn-auth-social:hover { background: var(--bg); border-color: #d1d5db; }
+        .btn-auth-social i { font-size: 18px; }
+        .btn-auth-social.btn-apple i { font-size: 20px; }
+        .auth-footer { font-size: 12px; color: var(--muted); line-height: 1.6; padding-top: 10px; }
+        .auth-footer a { color: var(--blue); text-decoration: underline; font-weight: 500; }
+
+        /* OTP STYLES */
+        .otp-inputs { display: flex; gap: 12px; justify-content: center; margin-bottom: 32px; margin-top: 16px; }
+        .otp-inputs input {
+            width: 56px; height: 64px; text-align: center; font-size: 32px;
+            font-weight: 700; border: 1.5px solid var(--border); border-radius: 12px;
+            color: var(--text); background: transparent;
+        }
+        .otp-inputs input:focus { border-color: var(--blue); outline: none; }
+        .otp-sub { font-size: 14px; color: var(--text); margin-bottom: 24px; line-height: 1.6; }
+        .otp-sub strong { color: var(--text); font-weight: 700; }
+        .resend-link { font-size: 14px; font-weight: 600; color: var(--text); text-decoration: underline; cursor: pointer; display: inline-block; margin-bottom: 24px;}
+        .resend-link:hover { color: var(--blue); }
+
+        .modal-step { display: none; }
+        .modal-step.active { display: block; animation: stepFadeIn .3s; }
+        @keyframes stepFadeIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
     </style>
 </head>
 <body>
@@ -328,8 +409,8 @@
 
     <div class="navbar-actions">
         <button class="btn-ghost"><i class="fa-regular fa-circle-question"></i> Help</button>
-        <button class="btn-ghost">Login</button>
-        <button class="btn-primary">Sign Up</button>
+        <button class="btn-ghost" onclick="openAuthModal()">Login</button>
+        <button class="btn-primary" onclick="openAuthModal()">Sign Up</button>
     </div>
 </nav>
 
@@ -829,6 +910,165 @@
             icon.classList.toggle('fa-solid');
         });
     });
+
+    // Auth Modal Logic
+    let authOverlay, step1, step2, emailInput, displayEmail, btnContinueEmail, otpInputs;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        authOverlay = document.getElementById('authOverlay');
+        step1 = document.getElementById('authStep1');
+        step2 = document.getElementById('authStep2');
+        emailInput = document.getElementById('authEmail');
+        displayEmail = document.getElementById('displayEmail');
+        btnContinueEmail = document.getElementById('btnContinueEmail');
+
+        // Close on overlay click
+        authOverlay.addEventListener('click', (e) => {
+            if (e.target === authOverlay) window.closeAuthModal();
+        });
+
+        // Enable button based on input
+        emailInput.addEventListener('input', (e) => {
+            btnContinueEmail.disabled = e.target.value.trim() === '';
+        });
+
+        // OTP Input Logic
+        otpInputs = document.querySelectorAll('.otp-inputs input');
+        otpInputs.forEach((input, index) => {
+            input.addEventListener('keyup', (e) => {
+                if (e.key >= 0 && e.key <= 9) {
+                    if (index < otpInputs.length - 1) {
+                        otpInputs[index + 1].focus();
+                    } else {
+                        // All filled, pretend to confirm code...
+                        const code = Array.from(otpInputs).map(i => i.value).join('');
+                        if(code.length === 4) {
+                            const btnConfirmCode = document.getElementById('btnConfirmCode');
+                            if(btnConfirmCode) btnConfirmCode.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Confirming...';
+                            setTimeout(() => {
+                                window.location.href = '/dashboard'; // Pretend login success
+                            }, 1000);
+                        }
+                    }
+                } else if (e.key === 'Backspace') {
+                    if (index > 0 && input.value === '') {
+                        otpInputs[index - 1].focus();
+                    }
+                }
+            });
+        });
+    });
+
+    window.openAuthModal = function() {
+        if (!authOverlay) return;
+        authOverlay.classList.add('active');
+        step1.classList.add('active');
+        step2.classList.remove('active');
+        emailInput.value = '';
+        btnContinueEmail.disabled = true;
+    };
+
+    window.closeAuthModal = function() {
+        if (!authOverlay) return;
+        authOverlay.classList.remove('active');
+        setTimeout(() => {
+            step1.classList.remove('active');
+            step2.classList.remove('active');
+        }, 300);
+    };
+
+    window.goStep2 = function() {
+        if (!emailInput.value.trim()) return;
+        step1.classList.remove('active');
+        step2.classList.add('active');
+        displayEmail.innerText = emailInput.value;
+        if (otpInputs) {
+            otpInputs.forEach(i => i.value = '');
+            setTimeout(() => otpInputs[0].focus(), 100);
+        }
+    };
+
+    window.confirmOtp = function() {
+        const btnConfirmCode = document.getElementById('btnConfirmCode');
+        if(btnConfirmCode) btnConfirmCode.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Confirming...';
+        setTimeout(() => {
+            window.location.href = '/dashboard'; // Go to dashboard if registered/mock
+        }, 1000);
+    };
+
 </script>
+
+{{-- ═══════════════════ AUTH MODAL HTML ═══════════════════ --}}
+<div class="auth-modal-overlay" id="authOverlay">
+    <div class="auth-modal">
+        <!-- STEP 1: Email / Social -->
+        <div class="modal-step active" id="authStep1">
+            <div class="auth-header">
+                <button class="auth-close" onclick="closeAuthModal()"><i class="fa-solid fa-xmark"></i></button>
+                <h3>Sign in or sign up</h3>
+            </div>
+            <div class="auth-body">
+                <h2 class="auth-title">Welcome to CoastalCharmz</h2>
+
+                <div class="form-group">
+                    <label>Email address</label>
+                    <input type="email" id="authEmail" placeholder="e.g., mail@example.com" autocomplete="email">
+                </div>
+
+                <button class="btn-auth btn-auth-primary" id="btnContinueEmail" disabled onclick="goStep2()">
+                    Continue with email
+                </button>
+
+                <div class="auth-divider">or</div>
+
+                <div style="display: flex; justify-content: space-between; gap: 16px;">
+                    <a href="{{ route('login') }}" class="btn-auth btn-auth-social" style="flex:1; text-decoration:none;" title="Continue with password">
+                        <i class="fa-solid fa-key"></i>
+                    </a>
+
+                    <button class="btn-auth btn-auth-social" style="flex:1" title="Continue with Google">
+                        <i class="fa-brands fa-google" style="color:#DB4437;"></i>
+                    </button>
+                    <button class="btn-auth btn-auth-social btn-apple" style="flex:1" title="Continue with Apple">
+                        <i class="fa-brands fa-apple"></i>
+                    </button>
+                    <button class="btn-auth btn-auth-social" style="flex:1" title="Continue with Facebook">
+                        <i class="fa-brands fa-facebook" style="color:#1877F2;"></i>
+                    </button>
+                </div>
+                
+                <div class="auth-footer">
+                    By moving forward, you agree to our <a href="#">Terms of Use</a> and <a href="#">Privacy Policy</a>.
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 2: OTP Verification -->
+        <div class="modal-step" id="authStep2">
+            <div class="auth-header">
+                <button class="auth-close" onclick="document.getElementById('authStep2').classList.remove('active'); document.getElementById('authStep1').classList.add('active');"><i class="fa-solid fa-chevron-left"></i></button>
+                <h3>Let's confirm it's you</h3>
+            </div>
+            <div class="auth-body" style="padding-top:20px; text-align:center;">
+                <h2 style="font-size:18px; font-weight:700; margin-bottom:12px;">Enter your verification code</h2>
+                <p class="otp-sub">We've sent a 4-digit code to:<br><strong id="displayEmail">mail@example.com</strong></p>
+
+                <div class="otp-inputs">
+                    <input type="text" maxlength="1" placeholder="-" />
+                    <input type="text" maxlength="1" placeholder="-" />
+                    <input type="text" maxlength="1" placeholder="-" />
+                    <input type="text" maxlength="1" placeholder="-" />
+                </div>
+
+                <span class="resend-link">Get a new code</span>
+
+                <button class="btn-auth btn-auth-primary" id="btnConfirmCode" onclick="confirmOtp()">
+                    Continue
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>

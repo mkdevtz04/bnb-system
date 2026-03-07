@@ -7,7 +7,7 @@
             <h1 class="text-4xl font-bold text-gray-900">Manage Apartments</h1>
             <div class="flex space-x-4">
                 <a 
-                    href="{{ route('admin.dashboard') }}"
+                    href="{{ route('admin.apartments') }}"
                     class="bg-gray-300 hover:bg-gray-400 text-gray-900 px-6 py-2 rounded-lg transition flex items-center"
                 >
                     ← Back to Dashboard
