@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coastalcharmz – Your Trip Starts Here</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -943,11 +944,7 @@
                         // All filled, pretend to confirm code...
                         const code = Array.from(otpInputs).map(i => i.value).join('');
                         if(code.length === 4) {
-                            const btnConfirmCode = document.getElementById('btnConfirmCode');
-                            if(btnConfirmCode) btnConfirmCode.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Confirming...';
-                            setTimeout(() => {
-                                window.location.href = '/dashboard'; // Pretend login success
-                            }, 1000);
+                            window.confirmOtp();
                         }
                     }
                 } else if (e.key === 'Backspace') {
@@ -977,23 +974,78 @@
         }, 300);
     };
 
-    window.goStep2 = function() {
-        if (!emailInput.value.trim()) return;
-        step1.classList.remove('active');
-        step2.classList.add('active');
-        displayEmail.innerText = emailInput.value;
-        if (otpInputs) {
-            otpInputs.forEach(i => i.value = '');
-            setTimeout(() => otpInputs[0].focus(), 100);
+    window.goStep2 = async function() {
+        const email = emailInput.value.trim();
+        if (!email) return;
+
+        btnContinueEmail.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
+        btnContinueEmail.disabled = true;
+
+        try {
+            const res = await fetch('/auth/otp/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ email: email })
+            });
+
+            const data = await res.json();
+            btnContinueEmail.innerHTML = 'Continue with email';
+            btnContinueEmail.disabled = false;
+
+            if (res.ok && data.success) {
+                step1.classList.remove('active');
+                step2.classList.add('active');
+                displayEmail.innerText = email;
+                if (otpInputs) {
+                    otpInputs.forEach(i => i.value = '');
+                    setTimeout(() => otpInputs[0].focus(), 100);
+                }
+            } else {
+                alert(data.message || 'Error sending code.');
+            }
+        } catch (error) {
+            btnContinueEmail.innerHTML = 'Continue with email';
+            btnContinueEmail.disabled = false;
+            alert('Something went wrong. Please try again.');
+            console.error(error);
         }
     };
 
-    window.confirmOtp = function() {
+    window.confirmOtp = async function() {
         const btnConfirmCode = document.getElementById('btnConfirmCode');
+        const code = Array.from(otpInputs).map(i => i.value).join('');
+        
+        if (code.length !== 4) return;
+        
+        const originalText = btnConfirmCode.innerHTML;
         if(btnConfirmCode) btnConfirmCode.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Confirming...';
-        setTimeout(() => {
-            window.location.href = '/dashboard'; // Go to dashboard if registered/mock
-        }, 1000);
+
+        try {
+            const res = await fetch('/auth/otp/verify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ email: emailInput.value.trim(), code: code })
+            });
+
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                window.location.href = data.redirect; // Laravel controller decides dashboard vs admin
+            } else {
+                if(btnConfirmCode) btnConfirmCode.innerHTML = originalText;
+                alert(data.message || 'Invalid code. Please try again.');
+            }
+        } catch (error) {
+            if(btnConfirmCode) btnConfirmCode.innerHTML = originalText;
+            alert('Something went wrong verifying the code.');
+            console.error(error);
+        }
     };
 
 </script>
