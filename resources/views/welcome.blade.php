@@ -400,12 +400,11 @@
     </a>
 
     <div class="navbar-links">
-        <a href="#">Hotels</a>
-        <a href="#">Villas</a>
-        <a href="#">Guest Houses</a>
-        <a href="#">Experiences</a>
-        <a href="#">Camping</a>
-        <a href="#">Rooms</a>
+        <a href="#">Our Apartments</a>
+        <a href="#">Amenities</a>
+        <a href="#">Gallery</a>
+        <a href="#">Neighborhood</a>
+        <a href="#">Contact Host</a>
     </div>
 
     <div class="navbar-actions">
@@ -417,25 +416,22 @@
 
 {{-- ═══════════════════ HERO ═══════════════════ --}}
 <section class="hero">
-    <div class="hero-bg-overlay" style="background-image: url('{{ asset('images/table-bookshelf.jpg') }}');"></div>
+    <div class="hero-bg-overlay" style="background-image: url('{{ asset('images/luxury-decor.jpg') }}');"></div>
     <div class="hero-shapes"><span></span><span></span><span></span></div>
     <div class="hero-content">
-        <h1>Your Trip Starts Here</h1>
-        <p>Find unique stays across hotels, villas, and more</p>
+        <h1>Your Home Away From Home</h1>
+        <p>Discover our exclusive fully-furnished premium apartments</p>
 
         <div class="search-box">
-            <div class="search-tabs">
-                <button class="search-tab active"><i class="fa-solid fa-building"></i> Hotel</button>
-                <button class="search-tab"><i class="fa-solid fa-house"></i> House</button>
-                <button class="search-tab"><i class="fa-solid fa-umbrella-beach"></i> Guest House</button>
-                <button class="search-tab"><i class="fa-solid fa-tent"></i> Camping</button>
-                <button class="search-tab"><i class="fa-solid fa-star"></i> Experiences</button>
-                <button class="search-tab"><i class="fa-solid fa-door-open"></i> Rooms</button>
-            </div>
-            <div class="search-fields">
+            <div class="search-fields" style="grid-template-columns: 2fr 1.5fr 1.5fr 1.5fr auto;">
                 <div class="search-field">
-                    <label>Location</label>
-                    <input type="text" placeholder="Where are you going?">
+                    <label>Select Apartment</label>
+                    <select>
+                        <option>All Apartments</option>
+                        <option>The Grand Penthouse</option>
+                        <option>Oceanview Suite</option>
+                        <option>Downtown Loft</option>
+                    </select>
                 </div>
                 <div class="search-field">
                     <label>Check In</label>
@@ -446,14 +442,14 @@
                     <input type="date">
                 </div>
                 <div class="search-field">
-                    <label>Rooms &amp; Guests</label>
+                    <label>Guests</label>
                     <select>
-                        <option>1 room, 2 guests</option>
-                        <option>1 room, 1 guest</option>
-                        <option>2 rooms, 4 guests</option>
+                        <option>1-2 Guests</option>
+                        <option>3-4 Guests</option>
+                        <option>5+ Guests</option>
                     </select>
                 </div>
-                <button class="btn-search"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+                <button class="btn-search"><i class="fa-solid fa-calendar-check"></i> Check Availability</button>
             </div>
         </div>
     </div>
@@ -462,22 +458,22 @@
 {{-- ═══════════════════ WHY TRUST ═══════════════════ --}}
 <section class="section">
     <div class="container">
-        <div class="section-header"><div><h2 class="section-title">Why Travellers Trust Coastalcharmz</h2></div></div>
+        <div class="section-header"><div><h2 class="section-title">Why Stay With Us</h2></div></div>
         <div class="trust-grid">
             <div class="trust-card fade-up">
-                <div class="trust-icon"><i class="fa-solid fa-shield-halved"></i></div>
-                <h3>No Hidden Fees</h3>
-                <p>Transparent pricing with no hidden costs or surprise charges at checkout.</p>
+                <div class="trust-icon"><i class="fa-solid fa-couch"></i></div>
+                <h3>Premium Furnishings</h3>
+                <p>Every apartment is designed with luxury, comfort, and sophisticated style in mind.</p>
             </div>
             <div class="trust-card fade-up" style="transition-delay:.1s">
-                <div class="trust-icon"><i class="fa-solid fa-bolt"></i></div>
-                <h3>Instant Booking</h3>
-                <p>Confirm your stay in seconds right after you find what you need.</p>
+                <div class="trust-icon"><i class="fa-solid fa-wifi"></i></div>
+                <h3>High-Speed WiFi</h3>
+                <p>Stay seamlessly connected or work remotely with our complimentary fast internet.</p>
             </div>
             <div class="trust-card fade-up" style="transition-delay:.2s">
-                <div class="trust-icon"><i class="fa-solid fa-sliders"></i></div>
-                <h3>Flexibility</h3>
-                <p>Flexible cancellation options that work around your schedule and needs.</p>
+                <div class="trust-icon"><i class="fa-solid fa-map-location-dot"></i></div>
+                <h3>Prime Locations</h3>
+                <p>All our properties are situated in the best, safest neighborhoods of the city.</p>
             </div>
         </div>
     </div>
@@ -488,41 +484,38 @@
     <div class="container">
         <div class="section-header">
             <div>
-                <h2 class="section-title">Trending Destinations</h2>
-                <p class="section-subtitle">Most popular picks from our travellers</p>
+                <h2 class="section-title">Our Exclusive Apartments</h2>
+                <p class="section-subtitle">Browse through our beautifully designed spaces</p>
             </div>
-            <a href="#" class="section-link">View all <i class="fa-solid fa-arrow-right"></i></a>
+            <a href="#" class="section-link">View all properties <i class="fa-solid fa-arrow-right"></i></a>
         </div>
 
         <div class="filter-tabs">
-            <button class="filter-tab active">Going Fast</button>
-            <button class="filter-tab">Summer Escape</button>
-            <button class="filter-tab">Autumn Getaway</button>
-            <button class="filter-tab">Winter Cruise</button>
+            <button class="filter-tab active">All</button>
+            <button class="filter-tab">1 Bedroom</button>
+            <button class="filter-tab">2 Bedrooms</button>
+            <button class="filter-tab">Penthouses</button>
         </div>
 
         <div class="dest-grid">
             @php
-                $destinations = [
-                    ['name' => 'Paris, France', 'desc' => 'The city of love & lights', 'badge' => 'Trending', 'icon' => 'fa-eiffel-tower'],
-                    ['name' => 'Santorini, Greece', 'desc' => 'Iconic whitewashed cliffs', 'badge' => null, 'icon' => 'fa-water'],
-                    ['name' => 'Bali, Indonesia', 'desc' => 'Tropical paradise & culture', 'badge' => null, 'icon' => 'fa-umbrella-beach'],
-                    ['name' => 'Kyoto, Japan', 'desc' => 'Ancient temples & cherry blossoms', 'badge' => 'Hot', 'icon' => 'fa-torii-gate'],
+                $apartments = [
+                    ['name' => 'The Cozy Reading Room', 'desc' => '1 Bed • 1 Bath', 'badge' => 'Popular', 'image' => 'bookshelf-with-pouf.jpg'],
+                    ['name' => 'The Dining Suite', 'desc' => '2 Beds • 2 Baths', 'badge' => null, 'image' => 'dining-table.jpg'],
+                    ['name' => 'The Yellow Lamp Loft', 'desc' => 'Studio • 1 Bath', 'badge' => null, 'image' => 'yellow-lamp.jpg'],
+                    ['name' => 'The Executive Workspace', 'desc' => '1 Bed • 1 Bath • Office', 'badge' => 'New', 'image' => 'working-table.jpg'],
                 ];
             @endphp
 
-            @foreach($destinations as $i => $dest)
+            @foreach($apartments as $i => $apt)
             <div class="dest-card fade-up" style="transition-delay:{{ $i * 0.1 }}s">
-                {{-- Replace with: <img src="{{ asset('images/dest-' . $i+1 . '.jpg') }}" class="dest-card-img" alt="{{ $dest['name'] }}"> --}}
-                <div class="dest-card-placeholder">
-                    <i class="fa-solid {{ $dest['icon'] }}"></i>
-                </div>
-                @if($dest['badge'])
-                <div class="dest-badge">{{ $dest['badge'] }}</div>
+                <img src="{{ asset('images/' . $apt['image']) }}" class="dest-card-img" alt="{{ $apt['name'] }}" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+                @if($apt['badge'])
+                <div class="dest-badge">{{ $apt['badge'] }}</div>
                 @endif
                 <div class="dest-card-overlay">
-                    <h3>{{ $dest['name'] }}</h3>
-                    <p>{{ $dest['desc'] }}</p>
+                    <h3>{{ $apt['name'] }}</h3>
+                    <p>{{ $apt['desc'] }}</p>
                 </div>
             </div>
             @endforeach
@@ -535,35 +528,31 @@
     <div class="container">
         <div class="section-header">
             <div>
-                <h2 class="section-title">Deals for the Weekend</h2>
-                <p class="section-subtitle">Limited-time offers on top stays</p>
+                <h2 class="section-title">Available This Weekend</h2>
+                <p class="section-subtitle">Book your last-minute luxury getaway</p>
             </div>
             <div style="display:flex; gap:12px; align-items:center;">
                 <div class="section-nav">
                     <button class="nav-btn"><i class="fa-solid fa-chevron-left"></i></button>
                     <button class="nav-btn"><i class="fa-solid fa-chevron-right"></i></button>
                 </div>
-                <a href="#" class="section-link">See all <i class="fa-solid fa-arrow-right"></i></a>
             </div>
         </div>
 
         <div class="deals-grid">
             @php
                 $deals = [
-                    ['name' => 'Seaside Kennedy Villa', 'location' => 'Miami, USA', 'rating' => 4.9, 'price' => 175, 'old' => 220, 'status' => 'available', 'icon' => 'fa-umbrella-beach'],
-                    ['name' => 'Imperial Bungalow', 'location' => 'Phuket, Thailand', 'rating' => 4.7, 'price' => 140, 'old' => 180, 'status' => 'limited', 'icon' => 'fa-tree'],
-                    ['name' => 'Santorini Sunset Suites', 'location' => 'Santorini, Greece', 'rating' => 4.8, 'price' => 315, 'old' => 390, 'status' => 'available', 'icon' => 'fa-water'],
-                    ['name' => 'MaDellia Resort', 'location' => 'Maldives', 'rating' => 5.0, 'price' => 482, 'old' => 610, 'status' => 'limited', 'icon' => 'fa-fish'],
+                    ['name' => 'Residential Area View', 'location' => 'City Center', 'rating' => 4.9, 'price' => 175, 'old' => 220, 'status' => 'available', 'image' => 'residential-area.jpg'],
+                    ['name' => 'The Bookshelf Suite', 'location' => 'Downtown', 'rating' => 4.7, 'price' => 140, 'old' => 180, 'status' => 'limited', 'image' => 'table-bookshelf.jpg'],
+                    ['name' => 'Luxury Decor Penthouse', 'location' => 'Uptown', 'rating' => 4.8, 'price' => 315, 'old' => 390, 'status' => 'available', 'image' => 'luxury-decor.jpg'],
+                    ['name' => 'Grand Dining Apartment', 'location' => 'City Center', 'rating' => 5.0, 'price' => 280, 'old' => 310, 'status' => 'limited', 'image' => 'dining-table.jpg'],
                 ];
             @endphp
 
             @foreach($deals as $i => $deal)
             <div class="deal-card fade-up" style="transition-delay:{{ $i * 0.1 }}s">
                 <div class="deal-img-wrap">
-                    {{-- Replace with: <img src="{{ asset('images/deal-' . $i+1 . '.jpg') }}" alt="{{ $deal['name'] }}"> --}}
-                    <div class="deal-img-placeholder">
-                        <i class="fa-solid {{ $deal['icon'] }}"></i>
-                    </div>
+                    <img src="{{ asset('images/' . $deal['image']) }}" style="width: 100%; height: 100%; object-fit: cover;" alt="{{ $deal['name'] }}">
                     <div class="deal-fav"><i class="fa-solid fa-heart"></i></div>
                     <span class="deal-status {{ $deal['status'] === 'available' ? 'status-available' : 'status-limited' }}">
                         {{ $deal['status'] === 'available' ? 'Available' : 'Limited' }}
@@ -571,7 +560,7 @@
                 </div>
                 <div class="deal-body">
                     <h3>{{ $deal['name'] }}</h3>
-                    <div class="deal-location"><i class="fa-solid fa-location-dot"></i> {{ $deal['location'] }}</div>
+                    <div class="deal-location"><i class="fa-solid fa-map-pin"></i> {{ $deal['location'] }}</div>
                     <div class="deal-footer">
                         <div class="deal-rating">
                             <i class="fa-solid fa-star"></i> {{ $deal['rating'] }}
@@ -588,191 +577,7 @@
     </div>
 </section>
 
-{{-- ═══════════════════ TRAVEL MORE SPEND LESS ═══════════════════ --}}
-<section class="section section-alt">
-    <div class="container">
-        <div class="section-header"><h2 class="section-title">Travel more, spend less</h2></div>
-        <div class="promo-grid">
-            <div class="promo-card fade-up">
-                <h4>5% discounts on stays</h4>
-                <p>Get discounts on participating accommodations across our platform.</p>
-            </div>
-            <div class="promo-card fade-up" style="transition-delay:.1s">
-                <h4>Traveller of Season</h4>
-                <p>Exclusive rewards for travel enthusiasts and loyal users.</p>
-            </div>
-            <div class="promo-card fade-up" style="transition-delay:.2s">
-                <h4>Exclusive Deals</h4>
-                <p>Enjoy exclusive deals with partner properties around the world.</p>
-            </div>
-            <div class="promo-card fade-up" style="transition-delay:.3s">
-                <h4>Weekend Special</h4>
-                <p>Save up to 10% on weekend stays at select properties.</p>
-            </div>
-        </div>
-    </div>
-</section>
 
-{{-- ═══════════════════ TOP SIGHTS ═══════════════════ --}}
-<section class="section">
-    <div class="container">
-        <div class="section-header">
-            <div><h2 class="section-title">Top Sights to See</h2></div>
-            <a href="#" class="section-link">Explore all <i class="fa-solid fa-arrow-right"></i></a>
-        </div>
-
-        <div class="sights-grid">
-            @php
-                $sights = [
-                    ['name' => 'Sassnitz', 'flag' => '🇩🇪', 'icon' => 'fa-mountain'],
-                    ['name' => 'Binz', 'flag' => '🇩🇪', 'icon' => 'fa-water'],
-                    ['name' => 'Sagard', 'flag' => '🇩🇪', 'icon' => 'fa-tree'],
-                    ['name' => 'Burgee', 'flag' => '🇩🇪', 'icon' => 'fa-city'],
-                    ['name' => 'Freedom', 'flag' => '🇺🇸', 'icon' => 'fa-monument'],
-                    ['name' => 'Old Town', 'flag' => '🇵🇱', 'icon' => 'fa-church'],
-                ];
-            @endphp
-
-            @foreach($sights as $i => $sight)
-            <div class="sight-card fade-up" style="transition-delay:{{ $i * 0.08 }}s">
-                <div class="sight-img-wrap">
-                    {{-- Replace with: <img src="{{ asset('images/sight-' . $i+1 . '.jpg') }}" alt="{{ $sight['name'] }}"> --}}
-                    <div class="sight-img-placeholder">
-                        <i class="fa-solid {{ $sight['icon'] }}"></i>
-                    </div>
-                </div>
-                <div class="sight-overlay">
-                    <h3>{{ $sight['name'] }} <span class="sight-flag">{{ $sight['flag'] }}</span></h3>
-                </div>
-            </div>
-            @endforeach
-        </div>
-    </div>
-</section>
-
-{{-- ═══════════════════ THINGS TO DO ═══════════════════ --}}
-<section class="section section-alt">
-    <div class="container">
-        <div class="section-header">
-            <div><h2 class="section-title">Top Things to Do in Barcelona</h2></div>
-        </div>
-
-        <div class="filter-tabs" style="margin-bottom:24px">
-            <button class="filter-tab active">Explore</button>
-            <button class="filter-tab">Events</button>
-            <button class="filter-tab">Museums</button>
-            <button class="filter-tab">Dine</button>
-            <button class="filter-tab">Food</button>
-            <button class="filter-tab">Night Life</button>
-        </div>
-
-        <div class="things-grid">
-            @php
-                $things = [
-                    ['name' => 'Sagrada Familia', 'icon' => 'fa-church'],
-                    ['name' => 'Park Güell', 'icon' => 'fa-tree'],
-                    ['name' => 'Casa Milà', 'icon' => 'fa-building'],
-                    ['name' => 'Palau Sant Jordi', 'icon' => 'fa-landmark'],
-                    ['name' => 'Arc de Triomf', 'icon' => 'fa-archway'],
-                    ['name' => 'Casa Batlló', 'icon' => 'fa-city'],
-                ];
-            @endphp
-
-            @foreach($things as $i => $thing)
-            <div class="thing-card fade-up" style="transition-delay:{{ $i * 0.08 }}s">
-                <div class="thing-img-wrap">
-                    {{-- Replace with: <img src="{{ asset('images/thing-' . $i+1 . '.jpg') }}" alt="{{ $thing['name'] }}"> --}}
-                    <div class="thing-img-placeholder">
-                        <i class="fa-solid {{ $thing['icon'] }}"></i>
-                    </div>
-                </div>
-                <span>{{ $thing['name'] }}</span>
-            </div>
-            @endforeach
-        </div>
-    </div>
-</section>
-
-{{-- ═══════════════════ EXPLORE IN MOTION ═══════════════════ --}}
-<section class="motion-section">
-    <div class="motion-inner">
-        <div class="motion-content">
-            <h2 class="section-title">Step Into a World<br>of Luxury</h2>
-            <p>Immerse yourself in captivating visuals from our most iconic and indulgent destinations.</p>
-            <button class="btn-outline-white">Explore All Videos</button>
-        </div>
-        <div class="motion-images">
-            <div class="motion-img-card tall">
-                {{-- Replace with: <img src="{{ asset('images/motion-1.jpg') }}" alt="Luxury destination"> --}}
-                <div class="motion-img-placeholder"><i class="fa-solid fa-play-circle fa-2x"></i></div>
-                <div class="motion-img-label">Maldives <div class="motion-img-rating"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div></div>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:12px;">
-                <div class="motion-img-card">
-                    {{-- Replace with: <img src="{{ asset('images/motion-2.jpg') }}" alt="Luxury stay"> --}}
-                    <div class="motion-img-placeholder"><i class="fa-solid fa-water"></i></div>
-                    <div class="motion-img-label">Bora Bora</div>
-                </div>
-                <div class="motion-img-card">
-                    {{-- Replace with: <img src="{{ asset('images/motion-3.jpg') }}" alt="Mountain resort"> --}}
-                    <div class="motion-img-placeholder"><i class="fa-solid fa-mountain"></i></div>
-                    <div class="motion-img-label">Swiss Alps</div>
-                </div>
-                <div class="motion-img-card">
-                    {{-- Replace with: <img src="{{ asset('images/motion-4.jpg') }}" alt="City view"> --}}
-                    <div class="motion-img-placeholder"><i class="fa-solid fa-city"></i></div>
-                    <div class="motion-img-label">New York <div class="motion-img-rating"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-{{-- ═══════════════════ HOMES GUESTS LOVE ═══════════════════ --}}
-<section class="section">
-    <div class="container">
-        <div class="section-header">
-            <div><h2 class="section-title">Homes Guests Love</h2></div>
-            <div style="display:flex; gap:12px; align-items:center;">
-                <div class="section-nav">
-                    <button class="nav-btn"><i class="fa-solid fa-chevron-left"></i></button>
-                    <button class="nav-btn"><i class="fa-solid fa-chevron-right"></i></button>
-                </div>
-            </div>
-        </div>
-
-        <div class="homes-grid">
-            @php
-                $homes = [
-                    ['name' => 'Azure Horizon Hotel', 'location' => 'Dubai, UAE', 'rating' => 4.9, 'price' => 240, 'icon' => 'fa-hotel'],
-                    ['name' => 'Palm Grove House', 'location' => 'Maldives', 'rating' => 4.8, 'price' => 375, 'icon' => 'fa-umbrella-beach'],
-                    ['name' => 'Casa Tranquila Guest…', 'location' => 'Palma, Spain', 'rating' => 4.7, 'price' => 315, 'icon' => 'fa-house'],
-                    ['name' => 'Villa San Martino Gues…', 'location' => 'Tuscany, Italy', 'rating' => 4.9, 'price' => 392, 'icon' => 'fa-archway'],
-                ];
-            @endphp
-
-            @foreach($homes as $i => $home)
-            <div class="deal-card fade-up" style="transition-delay:{{ $i * 0.1 }}s">
-                <div class="deal-img-wrap">
-                    {{-- Replace with: <img src="{{ asset('images/home-' . $i+1 . '.jpg') }}" alt="{{ $home['name'] }}"> --}}
-                    <div class="deal-img-placeholder">
-                        <i class="fa-solid {{ $home['icon'] }}"></i>
-                    </div>
-                    <div class="deal-fav"><i class="fa-regular fa-heart"></i></div>
-                </div>
-                <div class="deal-body">
-                    <h3>{{ $home['name'] }}</h3>
-                    <div class="deal-location"><i class="fa-solid fa-location-dot"></i> {{ $home['location'] }}</div>
-                    <div class="deal-footer">
-                        <div class="deal-rating"><i class="fa-solid fa-star"></i> {{ $home['rating'] }}</div>
-                        <div class="deal-price"><strong>${{ $home['price'] }}</strong><span style="font-size:11px;color:var(--muted)">/night</span></div>
-                    </div>
-                </div>
-            </div>
-            @endforeach
-        </div>
-    </div>
-</section>
 
 {{-- ═══════════════════ TESTIMONIAL ═══════════════════ --}}
 <section class="testimonial-section">
@@ -808,7 +613,7 @@
                 <a href="{{ url('/') }}" class="footer-logo">
                     <span>coastalcharmz</span>
                 </a>
-                <p>Find and book unique stays across hotels, villas, guest houses, and more around the world.</p>
+                <p>Find and book premium, fully-furnished apartments curated by an experienced host to make your stay unforgettable.</p>
                 <div class="footer-apps">
                     <div class="store-btn"><i class="fab fa-apple"></i><div>Download on the<strong>App Store</strong></div></div>
                     <div class="store-btn"><i class="fab fa-google-play"></i><div>Get it on<strong>Google Play</strong></div></div>
@@ -816,26 +621,26 @@
             </div>
 
             <div class="footer-col">
-                <h5>Explore</h5>
+                <h5>Our Apartments</h5>
                 <ul>
-                    <li><a href="#">Trending Destinations</a></li>
-                    <li><a href="#">Famous Personalities</a></li>
-                    <li><a href="#">Services Premium</a></li>
-                    <li><a href="#">Adventurous Drops</a></li>
-                    <li><a href="#">Beach Deals</a></li>
-                    <li><a href="#">Jungle</a></li>
+                    <li><a href="#">The Cozy Reading Room</a></li>
+                    <li><a href="#">The Dining Suite</a></li>
+                    <li><a href="#">The Yellow Lamp Loft</a></li>
+                    <li><a href="#">The Executive Workspace</a></li>
+                    <li><a href="#">Residential Area View</a></li>
+                    <li><a href="#">Luxury Decor Penthouse</a></li>
                 </ul>
             </div>
 
             <div class="footer-col">
-                <h5>Property Types</h5>
+                <h5>Resources</h5>
                 <ul>
-                    <li><a href="#">Hotels</a></li>
-                    <li><a href="#">Villas</a></li>
-                    <li><a href="#">Guest Houses</a></li>
-                    <li><a href="#">Glamping</a></li>
-                    <li><a href="#">Camping</a></li>
-                    <li><a href="#">Gyms</a></li>
+                    <li><a href="#">About the Host</a></li>
+                    <li><a href="#">Neighborhood Guide</a></li>
+                    <li><a href="#">Check-in Instructions</a></li>
+                    <li><a href="#">House Rules</a></li>
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Reviews</a></li>
                 </ul>
             </div>
 
@@ -843,9 +648,8 @@
                 <h5>Support</h5>
                 <ul>
                     <li><a href="#">Help Center</a></li>
-                    <li><a href="#">Get Support</a></li>
-                    <li><a href="#">Item Support</a></li>
-                    <li><a href="#">Contact Us</a></li>
+                    <li><a href="#">Cancellation Policy</a></li>
+                    <li><a href="#">Contact Host</a></li>
                 </ul>
             </div>
 
