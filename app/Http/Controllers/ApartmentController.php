@@ -92,6 +92,10 @@ class ApartmentController extends Controller
             ->with(['images'])
             ->get();
 
-        return view('dashboard', compact('apartments'));
+        $user = auth()->user();
+        $myBookings = $user->bookings()->with('apartment.images')->latest()->take(3)->get();
+        $notifications = $user->unreadNotifications()->take(5)->get();
+
+        return view('dashboard', compact('apartments', 'myBookings', 'notifications'));
     }
 }

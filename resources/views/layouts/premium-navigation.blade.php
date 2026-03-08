@@ -23,6 +23,7 @@
             @if(Auth::user()->role == 'admin')
                 <a href="{{ route('admin.dashboard') }}" class="btn-primary-premium">Admin Extranet</a>
             @else
+                <a href="{{ route('bookings.history') }}" class="btn-ghost-premium"><i class="fa-solid fa-calendar-check"></i> My Bookings</a>
                 <a href="{{ route('dashboard') }}" class="btn-primary-premium">Dashboard</a>
             @endif
             

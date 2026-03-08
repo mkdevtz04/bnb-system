@@ -63,4 +63,12 @@ class Booking extends Model
     {
         return $this->status === 'cancelled';
     }
+
+    /**
+     * Get messages for this booking
+     */
+    public function messages()
+    {
+        return $this->hasMany(Message::class);
+    }
 }

@@ -23,7 +23,7 @@
                     <p class="text-sm text-gray-600 font-medium">You have <strong class="text-gray-900">{{ $pendingBookings }} pending bookings</strong> that need your confirmation.</p>
                 </div>
             </div>
-            <a href="{{ route('admin.bookings' . '?status=pending') }}" class="bg-[#0071C2] hover:bg-[#005999] shadow-sm text-white px-6 py-2.5 rounded font-bold text-sm transition text-center w-full md:w-auto">
+            <a href="{{ route('admin.bookings', ['status' => 'pending']) }}" class="bg-[#0071C2] hover:bg-[#005999] shadow-sm text-white px-6 py-2.5 rounded font-bold text-sm transition text-center w-full md:w-auto">
                 Review Bookings
             </a>
         </div>
@@ -81,8 +81,35 @@
         <!-- Main Content Grid -->
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
             
-            <!-- Quick Actions -->
+            <!-- Left Column: Quick Actions & Notifications -->
             <div class="xl:col-span-1 space-y-6">
+                <!-- Notifications Section -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <h2 class="text-lg font-bold text-gray-900 mb-5 border-b border-gray-100 pb-3 flex items-center justify-between">
+                        <span>Recent Alerts</span>
+                        @if($notifications->count() > 0)
+                            <span class="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full">{{ $notifications->count() }} NEW</span>
+                        @endif
+                    </h2>
+                    <div class="space-y-4">
+                        @forelse($notifications as $notification)
+                            <div class="p-3 bg-blue-50 rounded-lg border border-blue-100 relative group">
+                                <p class="text-sm font-bold text-gray-900 mb-1">{{ $notification->data['message'] }}</p>
+                                <div class="text-xs text-gray-600 space-y-0.5">
+                                    <p>Guest: {{ $notification->data['guest_name'] }}</p>
+                                    <p>Dates: {{ \Carbon\Carbon::parse($notification->data['check_in'])->format('M d') }} - {{ \Carbon\Carbon::parse($notification->data['check_out'])->format('M d') }}</p>
+                                </div>
+                                <p class="text-[10px] text-gray-400 mt-2">{{ $notification->created_at->diffForHumans() }}</p>
+                                <a href="{{ route('admin.bookings') }}" class="absolute inset-0 z-0"></a>
+                            </div>
+                        @empty
+                            <div class="text-center py-6">
+                                <p class="text-gray-400 text-sm">No new notifications</p>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                     <h2 class="text-lg font-bold text-gray-900 mb-5 border-b border-gray-100 pb-3">Quick Actions</h2>
                     <div class="space-y-3">
@@ -98,12 +125,6 @@
                             </div>
                             <span class="text-gray-300 font-bold group-hover:text-[#0071C2]">→</span>
                         </a>
-                        <button onclick="alert('Finance dashboard coming soon!')" class="flex items-center justify-between w-full p-4 border border-gray-200 rounded-lg hover:border-[#0071C2] hover:bg-blue-50 transition group shadow-sm bg-white cursor-pointer">
-                            <div class="flex items-center text-gray-700 font-semibold group-hover:text-[#0071C2]">
-                                <span class="mr-3 text-xl">💰</span> Finance & statements
-                            </div>
-                            <span class="text-gray-300 font-bold group-hover:text-[#0071C2]">→</span>
-                        </button>
                     </div>
                 </div>
 
@@ -138,61 +159,54 @@
                                     <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-widest bg-gray-50/30">Property</th>
                                     <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-widest bg-gray-50/30">Dates</th>
                                     <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-widest bg-gray-50/30">Status</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-widest bg-gray-50/30">Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100">
-                                <!-- Mocks mimicking Booking.com row styling -->
+                                @forelse($recentActivity as $activity)
                                 <tr class="hover:bg-blue-50/50 transition cursor-default">
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center">
-                                            <div class="h-10 w-10 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center text-[#003B95] font-bold text-sm shadow-sm opacity-90">JD</div>
+                                            @php
+                                                $initials = collect(explode(' ', $activity->user->name))->map(fn($n) => mb_substr($n, 0, 1))->take(2)->join('');
+                                            @endphp
+                                            <div class="h-10 w-10 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center text-[#003B95] font-bold text-sm shadow-sm opacity-90">{{ strtoupper($initials) }}</div>
                                             <div class="ml-4">
-                                                <p class="text-sm font-bold text-gray-900">John Doe</p>
-                                                <p class="text-xs font-medium text-gray-500 mt-0.5">Ref: #1029384</p>
+                                                <p class="text-sm font-bold text-gray-900">{{ $activity->user->name }}</p>
+                                                <p class="text-xs font-medium text-gray-500 mt-0.5">Ref: #{{ str_pad($activity->id, 7, '0', STR_PAD_LEFT) }}</p>
                                             </div>
                                         </div>
                                     </td>
                                     <td class="px-6 py-4">
-                                        <p class="text-sm font-bold text-gray-900">Downtown Luxury Loft</p>
-                                        <p class="text-xs font-medium text-gray-500 mt-0.5">ID: #APT-0001</p>
+                                        <p class="text-sm font-bold text-gray-900">{{ $activity->apartment->name }}</p>
+                                        <p class="text-xs font-medium text-gray-500 mt-0.5">ID: #APT-{{ str_pad($activity->apartment->id, 4, '0', STR_PAD_LEFT) }}</p>
                                     </td>
                                     <td class="px-6 py-4">
-                                        <p class="text-sm font-bold text-gray-900">Mar 10 - Mar 15</p>
-                                        <p class="text-xs font-medium text-gray-500 mt-0.5">5 nights</p>
+                                        <p class="text-sm font-bold text-gray-900">{{ $activity->check_in->format('M d') }} - {{ $activity->check_out->format('M d') }}</p>
+                                        <p class="text-xs font-medium text-gray-500 mt-0.5">{{ $activity->nights }} {{ Str::plural('night', $activity->nights) }}</p>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded shadow-sm bg-yellow-100 text-yellow-800 border border-yellow-200">Pending</span>
+                                        @if($activity->status === 'pending')
+                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded shadow-sm bg-yellow-100 text-yellow-800 border border-yellow-200">Pending</span>
+                                        @elseif($activity->status === 'confirmed')
+                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded shadow-sm bg-green-100 text-green-800 border border-green-200">Confirmed</span>
+                                        @else
+                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded shadow-sm bg-gray-100 text-gray-800 border border-gray-200">{{ ucfirst($activity->status) }}</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <a href="{{ route('messages.show', $activity) }}" class="text-[#0071C2] hover:text-[#005999] font-bold text-xs flex items-center gap-1">
+                                            <i class="fa-solid fa-message"></i> Chat
+                                        </a>
                                     </td>
                                 </tr>
-                                <tr class="hover:bg-blue-50/50 transition cursor-default">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div class="h-10 w-10 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-700 font-bold text-sm shadow-sm opacity-90">AS</div>
-                                            <div class="ml-4">
-                                                <p class="text-sm font-bold text-gray-900">Alice Smith</p>
-                                                <p class="text-xs font-medium text-gray-500 mt-0.5">Ref: #9483726</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <p class="text-sm font-bold text-gray-900">Seaside Villa</p>
-                                        <p class="text-xs font-medium text-gray-500 mt-0.5">ID: #APT-0002</p>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <p class="text-sm font-bold text-gray-900">Mar 22 - Mar 25</p>
-                                        <p class="text-xs font-medium text-gray-500 mt-0.5">3 nights</p>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded shadow-sm bg-green-100 text-green-800 border border-green-200">Confirmed</span>
-                                    </td>
-                                </tr>
-                                
-                                <!-- Empty state filler if needed -->
+                                @empty
                                 <tr>
                                     <td colspan="4" class="px-6 py-8 text-center text-gray-500">
-                                        <span class="text-sm font-medium">No other recent activity.</span>
+                                        <span class="text-sm font-medium">No recent activity yet.</span>
                                     </td>
                                 </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>

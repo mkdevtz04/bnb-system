@@ -6,6 +6,7 @@ use App\Models\Apartment;
 use App\Models\ApartmentImage;
 use App\Models\BlockedDate;
 use App\Models\Booking;
+use App\Notifications\BookingConfirmedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -20,8 +21,10 @@ class AdminController extends Controller
         $pendingBookings = Booking::where('status', 'pending')->count();
         $confirmedBookings = Booking::where('status', 'confirmed')->count();
         $totalApartments = Apartment::count();
+        $notifications = auth()->user()->unreadNotifications()->take(5)->get();
+        $recentActivity = Booking::with(['user', 'apartment'])->latest()->take(5)->get();
 
-        return view('admin.dashboard', compact('pendingBookings', 'confirmedBookings', 'totalApartments'));
+        return view('admin.dashboard', compact('pendingBookings', 'confirmedBookings', 'totalApartments', 'notifications', 'recentActivity'));
     }
 
     /**
@@ -62,6 +65,9 @@ class AdminController extends Controller
             ]);
             $checkIn->modify('+1 day');
         }
+
+        // Notify guest
+        $booking->user->notify(new BookingConfirmedNotification($booking));
 
         return back()->with('success', 'Booking confirmed and dates blocked');
     }

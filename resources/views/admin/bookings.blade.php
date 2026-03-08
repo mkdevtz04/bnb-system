@@ -122,7 +122,12 @@
                                                 </button>
                                             </form>
                                         @else
-                                            <span class="text-gray-500 text-xs">—</span>
+                                        @endif
+
+                                        @if($booking->status !== 'cancelled')
+                                            <a href="{{ route('messages.show', $booking) }}" class="bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1 rounded text-xs font-bold transition block w-full text-center">
+                                                <i class="fa-solid fa-message"></i> Chat
+                                            </a>
                                         @endif
                                     </td>
                                 </tr>

@@ -27,6 +27,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/bookings/{booking}/confirmation', [BookingController::class, 'confirmation'])->name('bookings.confirmation');
     Route::get('/bookings/history', [BookingController::class, 'history'])->name('bookings.history');
     Route::delete('/bookings/{booking}', [BookingController::class, 'cancel'])->name('bookings.cancel');
+
+    // Chat routes
+    Route::get('/bookings/{booking}/chat', [App\Http\Controllers\MessageController::class, 'show'])->name('messages.show');
+    Route::post('/bookings/{booking}/chat', [App\Http\Controllers\MessageController::class, 'store'])->name('messages.store');
 });
 
 // Admin routes

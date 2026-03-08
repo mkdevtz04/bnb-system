@@ -12,7 +12,7 @@ class BookingPolicy
      */
     public function create(User $user): bool
     {
-        return $user->role === 'user';
+        return in_array($user->role, ['user', 'admin']);
     }
 
     /**

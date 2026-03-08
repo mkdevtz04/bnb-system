@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Apartment;
 use App\Models\Booking;
+use App\Models\User;
+use App\Notifications\NewBookingNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 
 class BookingController extends Controller
 {
@@ -65,8 +68,12 @@ class BookingController extends Controller
             'status' => 'pending',
         ]);
 
+        // Notify Admin
+        $admins = User::where('role', 'admin')->get();
+        Notification::send($admins, new NewBookingNotification($booking));
+
         return redirect()->route('bookings.confirmation', $booking)
-            ->with('success', 'Booking created! Waiting for admin confirmation.');
+            ->with('success', 'Booking created! Your dates are now reserved pending admin confirmation.');
     }
 
     /**

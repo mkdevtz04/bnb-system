@@ -11,8 +11,14 @@
                     <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden">
                         <div class="flex flex-col md:flex-row">
                             <!-- Apartment Image -->
-                            <div class="w-full md:w-48 h-48 bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-                                <span class="text-5xl">🏢</span>
+                            <div class="w-full md:w-48 h-48 bg-gray-100 flex-shrink-0">
+                                @if($booking->apartment->images->count() > 0)
+                                    <img src="{{ asset('storage/' . $booking->apartment->images->first()->image_path) }}" class="w-full h-full object-cover">
+                                @else
+                                    <div class="w-full h-full flex items-center justify-center bg-blue-50">
+                                        <i class="fa-solid fa-hotel text-blue-200 text-4xl"></i>
+                                    </div>
+                                @endif
                             </div>
 
                             <!-- Booking Info -->
@@ -67,6 +73,16 @@
                                     >
                                         View Apartment
                                     </a>
+
+                                    @if($booking->status !== 'cancelled')
+                                        <a 
+                                            href="{{ route('messages.show', $booking) }}"
+                                            class="bg-gray-800 hover:bg-black text-white px-4 py-2 rounded-lg font-semibold transition flex items-center gap-2"
+                                        >
+                                            <i class="fa-solid fa-comments"></i>
+                                            Chat with Host
+                                        </a>
+                                    @endif
 
                                     @if($booking->status === 'pending' || $booking->status === 'confirmed')
                                         <form action="{{ route('bookings.cancel', $booking->id) }}" method="POST" class="inline">
