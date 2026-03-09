@@ -17,7 +17,9 @@
         @if($pendingBookings > 0)
         <div class="bg-white rounded-lg shadow-md p-5 mb-6 border-l-4 border-yellow-400 flex flex-col md:flex-row items-start md:items-center justify-between">
             <div class="flex items-center mb-4 md:mb-0">
-                <span class="text-3xl mr-4 bg-yellow-100 p-2 rounded-full">🔔</span>
+                <span class="mr-4 bg-yellow-100 p-2 rounded-full">
+                    <img src="{{ asset('icons/wall-clock.png') }}" class="w-8 h-8" alt="Alert">
+                </span>
                 <div>
                     <h3 class="font-bold text-gray-900 text-lg">Action Required</h3>
                     <p class="text-sm text-gray-600 font-medium">You have <strong class="text-gray-900">{{ $pendingBookings }} pending bookings</strong> that need your confirmation.</p>
@@ -30,7 +32,9 @@
         @else
         <div class="bg-white rounded-lg shadow-md p-5 mb-6 border-l-4 border-green-500 flex items-center justify-between">
             <div class="flex items-center">
-                <span class="text-3xl mr-4 bg-green-100 p-2 rounded-full">✨</span>
+                <span class="mr-4 bg-green-100 p-2 rounded-full">
+                    <img src="{{ asset('icons/check-mark.png') }}" class="w-8 h-8" alt="Caught up">
+                </span>
                 <div>
                     <h3 class="font-bold text-gray-900 text-lg">You're all caught up!</h3>
                     <p class="text-sm text-gray-600 font-medium">No pending bookings require your attention right now.</p>
@@ -40,12 +44,14 @@
         @endif
 
         <!-- Performance Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <!-- Pending Bookings Card -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition group cursor-default">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-gray-500 font-bold text-xs tracking-wider uppercase">Pending</h3>
-                    <div class="p-2.5 bg-yellow-50 rounded-lg text-yellow-600 group-hover:scale-110 transition-transform">⏳</div>
+                    <div class="p-1.5 bg-yellow-50 rounded-lg group-hover:scale-110 transition-transform">
+                        <img src="{{ asset('icons/time-managament.png') }}" class="w-8 h-8" alt="Pending">
+                    </div>
                 </div>
                 <div class="text-4xl font-extrabold text-gray-900 mb-1">{{ $pendingBookings }}</div>
                 <div class="text-sm text-gray-500 font-medium border-t border-gray-100 pt-3 mt-3">Awaiting host confirmation</div>
@@ -55,7 +61,9 @@
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition group cursor-default">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-gray-500 font-bold text-xs tracking-wider uppercase">Confirmed</h3>
-                    <div class="p-2.5 bg-green-50 rounded-lg text-green-600 group-hover:scale-110 transition-transform">✓</div>
+                    <div class="p-1.5 bg-green-50 rounded-lg group-hover:scale-110 transition-transform">
+                        <img src="{{ asset('icons/booking.png') }}" class="w-8 h-8" alt="Confirmed">
+                    </div>
                 </div>
                 <div class="text-4xl font-extrabold text-gray-900 mb-1">{{ $confirmedBookings }}</div>
                 <div class="text-sm text-green-600 font-bold flex items-center border-t border-gray-100 pt-3 mt-3">
@@ -63,11 +71,23 @@
                 </div>
             </div>
 
+            <!-- Inquiries Card -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition group cursor-default">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-gray-500 font-bold text-xs tracking-wider uppercase">Inquiries</h3>
+                    <div class="p-2.5 bg-purple-50 rounded-lg text-purple-600 group-hover:scale-110 transition-transform">📧</div>
+                </div>
+                <div class="text-4xl font-extrabold text-gray-900 mb-1">{{ $inquiryCount }}</div>
+                <div class="text-sm text-gray-500 font-medium border-t border-gray-100 pt-3 mt-3">New contact messages</div>
+            </div>
+
             <!-- Apartments Card -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition group">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-gray-500 font-bold text-xs tracking-wider uppercase">Properties</h3>
-                    <div class="p-2.5 bg-blue-50 rounded-lg text-[#003B95] group-hover:scale-110 transition-transform">🏢</div>
+                    <div class="p-1.5 bg-blue-50 rounded-lg group-hover:scale-110 transition-transform">
+                        <img src="{{ asset('icons/building.png') }}" class="w-8 h-8" alt="Properties">
+                    </div>
                 </div>
                 <div class="text-4xl font-extrabold text-gray-900 mb-1">{{ $totalApartments }}</div>
                 <div class="text-sm border-t border-gray-100 pt-3 mt-3">
@@ -115,13 +135,29 @@
                     <div class="space-y-3">
                         <a href="{{ route('admin.apartments.create') }}" class="flex items-center justify-between w-full p-4 border border-gray-200 rounded-lg hover:border-[#0071C2] hover:bg-blue-50 transition group shadow-sm bg-white">
                             <div class="flex items-center text-gray-700 font-semibold group-hover:text-[#0071C2]">
-                                <span class="mr-3 text-xl">➕</span> Add new property
+                                <span class="mr-3">
+                                    <img src="{{ asset('icons/add.png') }}" class="w-6 h-6" alt="Add">
+                                </span> Add new property
                             </div>
                             <span class="text-gray-300 font-bold group-hover:text-[#0071C2]">→</span>
                         </a>
                         <a href="{{ route('admin.bookings') }}" class="flex items-center justify-between w-full p-4 border border-gray-200 rounded-lg hover:border-[#0071C2] hover:bg-blue-50 transition group shadow-sm bg-white">
                             <div class="flex items-center text-gray-700 font-semibold group-hover:text-[#0071C2]">
-                                <span class="mr-3 text-xl">📅</span> View reservations
+                                <span class="mr-3">
+                                    <img src="{{ asset('icons/booking.png') }}" class="w-6 h-6" alt="Bookings">
+                                </span> View reservations
+                            </div>
+                            <span class="text-gray-300 font-bold group-hover:text-[#0071C2]">→</span>
+                        </a>
+                        <a href="{{ route('admin.users') }}" class="flex items-center justify-between w-full p-4 border border-gray-200 rounded-lg hover:border-[#0071C2] hover:bg-blue-50 transition group shadow-sm bg-white">
+                            <div class="flex items-center text-gray-700 font-semibold group-hover:text-[#0071C2]">
+                                <span class="mr-3 text-xl bg-purple-100 p-1.5 rounded-lg text-purple-600"><i class="fa-solid fa-users-gear"></i></span> User Management
+                            </div>
+                            <span class="text-gray-300 font-bold group-hover:text-[#0071C2]">→</span>
+                        </a>
+                        <a href="{{ route('admin.reports.booked') }}" class="flex items-center justify-between w-full p-4 border border-gray-200 rounded-lg hover:border-[#0071C2] hover:bg-blue-50 transition group shadow-sm bg-white">
+                            <div class="flex items-center text-gray-700 font-semibold group-hover:text-[#0071C2]">
+                                <span class="mr-3 text-xl bg-green-100 p-1.5 rounded-lg text-green-600"><i class="fa-solid fa-chart-line"></i></span> Booked Report
                             </div>
                             <span class="text-gray-300 font-bold group-hover:text-[#0071C2]">→</span>
                         </a>

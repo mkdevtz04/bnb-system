@@ -6,12 +6,46 @@ use App\Models\Apartment;
 use App\Models\ApartmentImage;
 use App\Models\BlockedDate;
 use App\Models\Booking;
+use App\Models\Inquiry;
 use App\Notifications\BookingConfirmedNotification;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
 {
+    /**
+     * Show all users for management
+     */
+    public function users(Request $request)
+    {
+        $query = User::whereHas('bookings')->withCount('bookings')->latest();
+
+        if ($request->has('search')) {
+            $query->where(function($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                  ->orWhere('email', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        $users = $query->paginate(20);
+        return view('admin.users.index', compact('users'));
+    }
+
+    /**
+     * Show booked report (Booked Users & Apartments)
+     */
+    public function bookedReport()
+    {
+        // Get unique users who have made a booking
+        $bookedUsers = User::whereHas('bookings')->withCount('bookings')->latest()->get();
+        
+        // Get unique apartments that have been booked
+        $bookedApartments = Apartment::whereHas('bookings')->withCount('bookings')->latest()->get();
+
+        return view('admin.reports.booked', compact('bookedUsers', 'bookedApartments'));
+    }
+
 
     /**
      * Show admin dashboard
@@ -21,10 +55,18 @@ class AdminController extends Controller
         $pendingBookings = Booking::where('status', 'pending')->count();
         $confirmedBookings = Booking::where('status', 'confirmed')->count();
         $totalApartments = Apartment::count();
-        $notifications = auth()->user()->unreadNotifications()->take(5)->get();
         $recentActivity = Booking::with(['user', 'apartment'])->latest()->take(5)->get();
+        $notifications = auth()->user()->unreadNotifications()->take(5)->get();
+        $inquiryCount = Inquiry::count();
 
-        return view('admin.dashboard', compact('pendingBookings', 'confirmedBookings', 'totalApartments', 'notifications', 'recentActivity'));
+        return view('admin.dashboard', compact(
+            'pendingBookings', 
+            'confirmedBookings', 
+            'totalApartments', 
+            'recentActivity', 
+            'notifications',
+            'inquiryCount'
+        ));
     }
 
     /**

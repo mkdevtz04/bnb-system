@@ -459,6 +459,143 @@
     </div>
 </section>
 
+{{-- ═══════════════════ AMENITIES (NEW) ═══════════════════ --}}
+<section class="section section-alt" id="amenities">
+    <div class="container">
+        <div class="section-header" style="justify-content: center; text-align: center; margin-bottom: 48px;">
+            <div>
+                <h2 class="section-title">World-Class Amenities</h2>
+                <p class="section-subtitle">Designed to provide the ultimate comfort and convenience</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div class="text-center p-6 bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 text-[#003B95]"><i class="fa-solid fa-person-swimming fa-2x"></i></div>
+                <h3 class="font-bold text-gray-900 mb-2">Private Pools</h3>
+                <p class="text-sm text-gray-500">Crystal clear infinity pools overlooking the ocean.</p>
+            </div>
+            <div class="text-center p-6 bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 text-[#003B95]"><i class="fa-solid fa-spa fa-2x"></i></div>
+                <h3 class="font-bold text-gray-900 mb-2">Luxury Spa</h3>
+                <p class="text-sm text-gray-500">In-house spa treatments by world-renowned therapists.</p>
+            </div>
+            <div class="text-center p-6 bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 text-[#003B95]"><i class="fa-solid fa-utensils fa-2x"></i></div>
+                <h3 class="font-bold text-gray-900 mb-2">Private Chef</h3>
+                <p class="text-sm text-gray-500">Fine dining prepared in your own kitchen by top chefs.</p>
+            </div>
+            <div class="text-center p-6 bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 text-[#003B95]"><i class="fa-solid fa-shield-halved fa-2x"></i></div>
+                <h3 class="font-bold text-gray-900 mb-2">24/7 Security</h3>
+                <p class="text-sm text-gray-500">Your safety is our priority with around-the-clock protection.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{{-- ═══════════════════ NEIGHBORHOOD (NEW) ═══════════════════ --}}
+<section class="section" id="neighborhood">
+    <div class="container">
+        <div class="flex flex-col md:flex-row gap-12 items-center">
+            <div class="md:w-1/2">
+                <img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=2000&auto=format&fit=crop" class="rounded-3xl shadow-xl w-full h-[500px] object-cover" alt="Neighborhood">
+            </div>
+            <div class="md:w-1/2">
+                <span class="text-[#003B95] font-black uppercase tracking-widest text-xs mb-4 block">The Area</span>
+                <h2 class="text-4xl font-black text-gray-900 mb-6 leading-tight">Explore the Vibrant Heart of the City</h2>
+                <p class="text-gray-600 mb-8 text-lg leading-relaxed">
+                    CoastalCharmz properties are perfectly positioned to give you access to the best the city has to offer. From Michelin-star restaurants to hidden cultural gems, everything is just a short walk away.
+                </p>
+                <div class="space-y-4">
+                    <div class="flex gap-4 items-start">
+                        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 text-green-700 italic font-black">1</div>
+                        <div>
+                            <h4 class="font-bold text-gray-900">Fine Dining District</h4>
+                            <p class="text-sm text-gray-500">The world's best culinary experiences are just blocks away.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 items-start">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 text-blue-700 italic font-black">2</div>
+                        <div>
+                            <h4 class="font-bold text-gray-900">Elite Shopping</h4>
+                            <p class="text-sm text-gray-500">Access to all luxury brands and boutiques in the main avenue.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{{-- ═══════════════════ CONTACT (NEW) ═══════════════════ --}}
+<section class="section section-alt" id="contact">
+    <div class="container">
+        <div class="bg-white rounded-[40px] shadow-2xl overflow-hidden flex flex-col md:flex-row border border-gray-100">
+            <div class="md:w-2/5 bg-[#003B95] p-12 text-white flex flex-col justify-between">
+                <div>
+                    <h2 class="text-3xl font-black mb-6">Let's Talk!</h2>
+                    <p class="opacity-80 mb-10">Have questions about our properties or need help with a booking? Our team is here to help 24/7.</p>
+                    
+                    <div class="space-y-6">
+                        <div class="flex gap-6 items-center">
+                            <i class="fa-solid fa-envelope fa-xl opacity-70"></i>
+                            <div>
+                                <p class="text-xs uppercase opacity-60 font-black tracking-widest">Email us</p>
+                                <p class="font-bold">hello@coastalcharmz.com</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-6 items-center">
+                            <i class="fa-solid fa-phone fa-xl opacity-70"></i>
+                            <div>
+                                <p class="text-xs uppercase opacity-60 font-black tracking-widest">Call us</p>
+                                <p class="font-bold">+1 9899 998 999</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex gap-4 mt-12">
+                    <a href="#" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition"><i class="fa-brands fa-facebook"></i></a>
+                    <a href="#" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition"><i class="fa-brands fa-x-twitter"></i></a>
+                </div>
+            </div>
+            
+            <div class="md:w-3/5 p-12">
+                @if(session('success'))
+                    <div class="bg-green-50 border border-green-200 text-green-700 px-6 py-4 rounded-2xl mb-8 flex items-center gap-4">
+                        <i class="fa-solid fa-circle-check fa-xl"></i>
+                        <p class="font-bold">{{ session('success') }}</p>
+                    </div>
+                @endif
+
+                <form action="{{ route('contact.store') }}" method="POST" class="space-y-6">
+                    @csrf
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-xs font-black uppercase text-gray-500 tracking-widest">Full Name</label>
+                            <input type="text" name="name" required class="w-full bg-gray-50 border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-[#003B95] transition" placeholder="John Doe">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-xs font-black uppercase text-gray-500 tracking-widest">Email Address</label>
+                            <input type="email" name="email" required class="w-full bg-gray-50 border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-[#003B95] transition" placeholder="john@example.com">
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs font-black uppercase text-gray-500 tracking-widest">Message</label>
+                        <textarea name="message" required rows="4" class="w-full bg-gray-50 border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-[#003B95] transition" placeholder="How can we help you?"></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-[#003B95] text-white font-black py-5 rounded-2xl hover:bg-[#002b6d] transition shadow-xl flex items-center justify-center gap-3">
+                        <span>Send Message</span>
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
 
 
 {{-- ═══════════════════ TESTIMONIAL ═══════════════════ --}}

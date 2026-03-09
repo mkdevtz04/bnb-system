@@ -11,6 +11,13 @@ Route::get('/', [ApartmentController::class, 'index'])->name('home');
 Route::get('/apartments/search', [ApartmentController::class, 'search'])->name('apartments.search');
 Route::get('/apartments/{apartment}', [ApartmentController::class, 'show'])->name('apartments.show');
 
+// Auth / OTP routes
+Route::post('/auth/otp/send', [App\Http\Controllers\OtpController::class, 'send']);
+Route::post('/auth/otp/verify', [App\Http\Controllers\OtpController::class, 'verify']);
+
+// Contact / Inquiry
+Route::post('/contact', [App\Http\Controllers\InquiryController::class, 'store'])->name('contact.store');
+
 // Authenticated user routes
 Route::middleware('auth')->group(function () {
     // Profile routes
@@ -50,6 +57,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::patch('/apartments/{apartment}/toggle-status', [AdminController::class, 'toggleStatus'])->name('apartments.toggle-status');
     Route::post('/apartments/{apartment}/block-dates', [AdminController::class, 'blockDates'])->name('apartments.block-dates');
     Route::delete('/apartments/images/{image}', [AdminController::class, 'destroyImage'])->name('apartments.images.destroy');
+
+    // User Management
+    Route::get('/users', [AdminController::class, 'users'])->name('users');
+
+    // Reports
+    Route::get('/reports/booked', [AdminController::class, 'bookedReport'])->name('reports.booked');
 });
 
 require __DIR__.'/auth.php';

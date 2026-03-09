@@ -186,6 +186,10 @@
                     <p>Ready to find your next luxury getaway? All our apartments are fully sanitized and ready for your arrival.</p>
                 </div>
                 <div class="flex gap-4">
+                    <a href="{{ route('profile.edit') }}" class="btn-book" style="width: auto; padding: 12px 24px; background: white; color: var(--text); border: 1.5px solid var(--border);">
+                        <i class="fa-solid fa-user-gear"></i>
+                        Edit Profile
+                    </a>
                     <a href="{{ route('bookings.history') }}" class="btn-book" style="width: auto; padding: 12px 24px; background: white; color: var(--blue); border: 1.5px solid var(--blue);">
                         <i class="fa-solid fa-clock-rotate-left"></i>
                         Booking History
