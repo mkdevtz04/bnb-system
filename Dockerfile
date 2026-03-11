@@ -1,36 +1,55 @@
-FROM php:8.3-apache
+# Use PHP 8.2 Apache as base
+FROM php:8.2-apache
 
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    git \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    zip \
     unzip \
+    git \
     libzip-dev \
-    zip
+    libonig-dev \
+    libpq-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN docker-php-ext-install pdo pdo_mysql zip
+# Install PHP extensions
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo_mysql pdo_pgsql mbstring zip exif pcntl gd bcmath
 
-# Enable Apache rewrite (Laravel needs this)
+# Enable Apache mod_rewrite
 RUN a2enmod rewrite
 
-# Set Apache root to Laravel public folder
-ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
-/etc/apache2/sites-available/*.conf
+# Install Node.js (needed for Vite build)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs
 
-RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' \
-/etc/apache2/apache2.conf \
-/etc/apache2/conf-available/*.conf
-
-COPY . /var/www/html
-
+# Set working directory
 WORKDIR /var/www/html
 
-# Install composer
-RUN curl -sS https://getcomposer.org/installer | php \
-    && mv composer.phar /usr/local/bin/composer
+# Copy application files
+COPY . .
 
-RUN composer install --no-dev --optimize-autoloader
+# Install PHP dependencies
+RUN composer install --no-interaction --optimize-autoloader --no-dev
 
-RUN chown -R www-data:www-data /var/www/html/storage
+# Install NPM dependencies and build assets
+RUN npm install && npm run build
 
+# Copy Apache configuration
+COPY docker/000-default.conf /etc/apache2/sites-available/000-default.conf
+
+# Set permissions for Laravel
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+
+# Expose port 80
 EXPOSE 80
+
+# Use the entrypoint script
+RUN chmod +x docker/run.sh
+CMD ["sh", "docker/run.sh"]
