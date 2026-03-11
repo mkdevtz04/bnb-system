@@ -1,18 +1,18 @@
 #!/bin/sh
 
-# Change ownership of storage and bootstrap/cache
+# Ensure permissions are correct every time the container starts
 chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Run migrations if database is available
-# php artisan migrate --force
-#!/bin/sh
-
-# Clear caches to ensure new Env variables are picked up
+# Clear and Cache configuration
+# Note: In production, 'config:cache' is better than 'config:clear'
 php artisan config:clear
 php artisan cache:clear
+php artisan view:clear
 
-# Run migrations (the --force flag is required for production)
-php artisan migrate --force
+# Run migrations (Force is required for production)
+# If this fails, the script stops here and won't start Apache (the White Screen)
+php artisan migrate --force || echo "Migration failed, but starting server anyway..."
 
-# Start Apache
-apache2-foreground
+# Start Apache in foreground
+exec apache2-foreground
