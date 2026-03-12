@@ -35,7 +35,7 @@
                         <!-- Image -->
                         @if($apartment->images->count() > 0)
                             <div class="h-40 bg-gray-200">
-                                <img src="{{ asset('storage/' . $apartment->images->first()->image_path) }}" alt="{{ $apartment->name }}" class="w-full h-full object-cover">
+                                <img src="{{ \Storage::url($apartment->images->first()->image_path) }}" alt="{{ $apartment->name }}" class="w-full h-full object-cover">
                             </div>
                         @else
                             <div class="h-40 bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">

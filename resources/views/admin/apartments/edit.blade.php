@@ -111,7 +111,7 @@
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     @foreach($apartment->images as $image)
                         <div class="relative group">
-                            <img src="{{ asset('storage/' . $image->image_path) }}" alt="Apartment Image" class="w-full h-32 object-cover rounded-lg show shadow">
+                            <img src="{{ \Storage::url($image->image_path) }}" alt="Apartment Image" class="w-full h-32 object-cover rounded-lg show shadow">
                             <form action="{{ route('admin.apartments.images.destroy', $image->id) }}" method="POST" class="absolute top-2 right-2 hidden group-hover:block" onsubmit="return confirm('Delete this image?');">
                                 @csrf
                                 @method('DELETE')

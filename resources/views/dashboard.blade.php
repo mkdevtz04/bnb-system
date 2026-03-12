@@ -210,7 +210,7 @@
                             <div style="background: white; border-radius: 16px; border: 1px solid var(--border); padding: 16px; display: flex; align-items: center; gap: 20px;">
                                 <div style="width: 100px; height: 70px; border-radius: 10px; overflow: hidden; flex-shrink: 0; background: var(--blue-light);">
                                     @if($booking->apartment->images->count() > 0)
-                                        <img src="{{ asset('storage/' . $booking->apartment->images->first()->image_path) }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                        <img src="{{ \Storage::url($booking->apartment->images->first()->image_path) }}" style="width: 100%; height: 100%; object-fit: cover;">
                                     @else
                                         <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
                                             <i class="fa-solid fa-image" style="color:var(--blue);"></i>
@@ -287,7 +287,7 @@
                         <div class="apt-card">
                             <div class="apt-image-wrapper">
                                 @if($apt->images->count() > 0)
-                                    <img src="{{ asset('storage/' . $apt->images->first()->image_path) }}" alt="{{ $apt->name }}">
+                                    <img src="{{ \Storage::url($apt->images->first()->image_path) }}" alt="{{ $apt->name }}">
                                 @else
                                     <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#f0f4f8;">
                                         <i class="fa-solid fa-image fa-2x" style="color:#cbd5e0;"></i>

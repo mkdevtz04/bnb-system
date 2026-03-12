@@ -13,7 +13,7 @@
                             <!-- Apartment Image -->
                             <div class="w-full md:w-48 h-48 bg-gray-100 flex-shrink-0">
                                 @if($booking->apartment->images->count() > 0)
-                                    <img src="{{ asset('storage/' . $booking->apartment->images->first()->image_path) }}" class="w-full h-full object-cover">
+                                    <img src="{{ \Storage::url($booking->apartment->images->first()->image_path) }}" class="w-full h-full object-cover">
                                 @else
                                     <div class="w-full h-full flex items-center justify-center bg-blue-50">
                                         <i class="fa-solid fa-hotel text-blue-200 text-4xl"></i>

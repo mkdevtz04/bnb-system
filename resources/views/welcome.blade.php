@@ -381,7 +381,7 @@
             @forelse($apartments as $i => $apt)
             <a href="{{ route('apartments.show', $apt->id) }}" class="dest-card fade-up" style="transition-delay:{{ $i * 0.1 }}s; text-decoration: none;">
                 @if($apt->images->count() > 0)
-                    <img src="{{ asset('storage/' . $apt->images->first()->image_path) }}" class="dest-card-img" alt="{{ $apt->name }}" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+                    <img src="{{ \Storage::url($apt->images->first()->image_path) }}" class="dest-card-img" alt="{{ $apt->name }}" style="width: 100%; height: 100%; object-fit: cover; display: block;">
                 @else
                     <div class="dest-card-placeholder">
                         <i class="fa-solid fa-building"></i>
@@ -430,7 +430,7 @@
             <a href="{{ route('apartments.show', $apt->id) }}" class="deal-card fade-up" style="transition-delay:{{ $i * 0.1 }}s; text-decoration: none;">
                 <div class="deal-img-wrap">
                     @if($apt->images->count() > 0)
-                        <img src="{{ asset('storage/' . $apt->images->first()->image_path) }}" style="width: 100%; height: 100%; object-fit: cover;" alt="{{ $apt->name }}">
+                        <img src="{{ \Storage::url($apt->images->first()->image_path) }}" style="width: 100%; height: 100%; object-fit: cover;" alt="{{ $apt->name }}">
                     @else
                         <div class="deal-img-placeholder">
                             <i class="fa-solid fa-building"></i>

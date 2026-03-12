@@ -62,7 +62,7 @@
                     <div class="relative h-48 overflow-hidden bg-gray-300">
                         @if($apartment->images->count() > 0)
                             <img 
-                                src="{{ asset('storage/' . $apartment->images->first()->image_path) }}" 
+                                src="{{ \Storage::url($apartment->images->first()->image_path) }}" 
                                 alt="{{ $apartment->name }}"
                                 class="w-full h-full object-cover group-hover:scale-110 transition duration-300"
                             >

@@ -199,8 +199,10 @@ class AdminController extends Controller
 
         // Handle image uploads
         if ($request->hasFile('images')) {
+            $disk = config('filesystems.default');
             foreach ($request->file('images') as $image) {
-                $path = $image->store('apartments', 'public');
+                // Use default disk (public or s3)
+                $path = $image->store('apartments', $disk);
                 $apartment->images()->create([
                     'image_path' => $path
                 ]);
@@ -239,8 +241,9 @@ class AdminController extends Controller
 
         // Handle additional image uploads
         if ($request->hasFile('images')) {
+            $disk = config('filesystems.default');
             foreach ($request->file('images') as $image) {
-                $path = $image->store('apartments', 'public');
+                $path = $image->store('apartments', $disk);
                 $apartment->images()->create([
                     'image_path' => $path
                 ]);
@@ -256,9 +259,10 @@ class AdminController extends Controller
     public function destroyApartment(Apartment $apartment)
     {
         // Delete all images from storage
+        $disk = config('filesystems.default');
         foreach ($apartment->images as $image) {
-            if (Storage::disk('public')->exists($image->image_path)) {
-                Storage::disk('public')->delete($image->image_path);
+            if (Storage::disk($disk)->exists($image->image_path)) {
+                Storage::disk($disk)->delete($image->image_path);
             }
         }
         
@@ -272,8 +276,9 @@ class AdminController extends Controller
      */
     public function destroyImage(ApartmentImage $image)
     {
-        if (Storage::disk('public')->exists($image->image_path)) {
-            Storage::disk('public')->delete($image->image_path);
+        $disk = config('filesystems.default');
+        if (Storage::disk($disk)->exists($image->image_path)) {
+            Storage::disk($disk)->delete($image->image_path);
         }
         
         $image->delete();

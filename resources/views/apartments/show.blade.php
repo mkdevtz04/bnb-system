@@ -196,11 +196,11 @@
 
                 <div class="main-gallery">
                     @if($apartment->images->count() > 0)
-                        <img src="{{ asset('storage/' . $apartment->images->first()->image_path) }}" class="main-image" id="mainImage">
+                        <img src="{{ \Storage::url($apartment->images->first()->image_path) }}" class="main-image" id="mainImage">
                         @if($apartment->images->count() > 1)
                             <div class="thumb-grid">
                                 @foreach($apartment->images as $i => $image)
-                                    <img src="{{ asset('storage/' . $image->image_path) }}" class="thumb {{ $i==0 ? 'active' : '' }}" onclick="changeImage(this)">
+                                    <img src="{{ \Storage::url($image->image_path) }}" class="thumb {{ $i==0 ? 'active' : '' }}" onclick="changeImage(this)">
                                 @endforeach
                             </div>
                         @endif
