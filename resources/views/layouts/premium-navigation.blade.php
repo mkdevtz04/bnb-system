@@ -18,22 +18,64 @@
     </div>
 
     <div class="navbar-actions">
-        <button class="btn-ghost-premium"><i class="fa-regular fa-circle-question"></i> Help</button>
+        <button class="btn-ghost-premium btn-help"><i class="fa-regular fa-circle-question"></i> Help</button>
         @auth
             @if(Auth::user()->role == 'admin')
                 <a href="{{ route('admin.dashboard') }}" class="btn-primary-premium">Admin Extranet</a>
             @else
-                <a href="{{ route('bookings.history') }}" class="btn-ghost-premium"><i class="fa-solid fa-calendar-check"></i> My Bookings</a>
+                <a href="{{ route('bookings.history') }}" class="btn-ghost-premium btn-bookings"><i class="fa-solid fa-calendar-check"></i> My Bookings</a>
                 <a href="{{ route('dashboard') }}" class="btn-primary-premium">Dashboard</a>
             @endif
             
             <form method="POST" action="{{ route('logout') }}" style="display: inline;">
                 @csrf
-                <button type="submit" class="btn-ghost-premium" style="color: #e74c3c;">Logout</button>
+                <button type="submit" class="btn-logout-premium" style="color: #e74c3c;">Logout</button>
             </form>
         @else
-            <a class="btn-primary-premium" href="{{ route('login') }}">Login</a>
-            <button class="btn-primary-premium" onclick="typeof openAuthModal === 'function' ? openAuthModal() : window.location.href='{{ route('register') }}'">Sign Up/Login</button>
+            <button class="btn-primary-premium" onclick="typeof openAuthModal === 'function' ? openAuthModal() : window.location.href='{{ route('login') }}'">Sign In / Login</button>
         @endauth
+        
+        <button class="mobile-toggle" onclick="toggleMobileMenu()">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </div>
+
+    <!-- Mobile Menu Overlay -->
+    <div class="mobile-menu-overlay" id="mobileMenu">
+        <div class="mobile-menu-content">
+            <button class="mobile-menu-close" onclick="toggleMobileMenu()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="mobile-links">
+                <a href="{{ url('/') }}#apartments" onclick="toggleMobileMenu()">Our Apartments</a>
+                <a href="#amenities" onclick="toggleMobileMenu()">Amenities</a>
+                <a href="#gallery" onclick="toggleMobileMenu()">Gallery</a>
+                <a href="#neighborhood" onclick="toggleMobileMenu()">Neighborhood</a>
+                @auth
+                    <hr>
+                    @if(Auth::user()->role == 'admin')
+                        <a href="{{ route('admin.dashboard') }}">Admin Extranet</a>
+                    @else
+                        <a href="{{ route('bookings.history') }}">My Bookings</a>
+                        <a href="{{ route('dashboard') }}">My Dashboard</a>
+                    @endif
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="mobile-logout-btn">Logout</button>
+                    </form>
+                @else
+                    <hr>
+                    <a href="{{ route('login') }}">Login / Register</a>
+                @endauth
+            </div>
+        </div>
     </div>
 </nav>
+
+<script>
+    function toggleMobileMenu() {
+        const menu = document.getElementById('mobileMenu');
+        menu.classList.toggle('active');
+        document.body.classList.toggle('overflow-hidden');
+    }
+</script>

@@ -174,6 +174,19 @@
             color: var(--blue-light);
             margin-bottom: 16px;
         }
+
+        @media (max-width: 1024px) {
+            .dashboard-container { padding: 24px 20px; }
+            .apt-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .welcome-hero { flex-direction: column; text-align: center; gap: 24px; padding: 24px; }
+            .welcome-hero .flex { width: 100%; justify-content: center; }
+            .apt-grid { grid-template-columns: 1fr; }
+            .recent-booking-item { flex-direction: column; text-align: center; }
+            .recent-booking-item .booking-img { width: 100% !important; height: 180px !important; }
+        }
     </style>
 
     <div class="dashboard-container">
@@ -207,8 +220,8 @@
                     
                     <div class="space-y-4">
                         @forelse($myBookings as $booking)
-                            <div style="background: white; border-radius: 16px; border: 1px solid var(--border); padding: 16px; display: flex; align-items: center; gap: 20px;">
-                                <div style="width: 100px; height: 70px; border-radius: 10px; overflow: hidden; flex-shrink: 0; background: var(--blue-light);">
+                            <div class="recent-booking-item" style="background: white; border-radius: 16px; border: 1px solid var(--border); padding: 16px; display: flex; align-items: center; gap: 20px;">
+                                <div class="booking-img" style="width: 100px; height: 70px; border-radius: 10px; overflow: hidden; flex-shrink: 0; background: var(--blue-light);">
                                     @if($booking->apartment->images->count() > 0)
                                         <img src="{{ \Storage::url($booking->apartment->images->first()->image_path) }}" style="width: 100%; height: 100%; object-fit: cover;">
                                     @else

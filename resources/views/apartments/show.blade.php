@@ -170,8 +170,22 @@
         .flatpickr-calendar { box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important; border: none !important; }
         .flatpickr-day.selected { background: var(--blue) !important; border-color: var(--blue) !important; }
         
+        @media (max-width: 1024px) {
+            .show-grid { gap: 24px; padding: 0 16px; }
+            .main-image { height: 380px; }
+        }
+
         @media (max-width: 900px) {
             .show-grid { grid-template-columns: 1fr; }
+            .booking-sidebar { position: static; margin-top: 32px; box-shadow: var(--shadow); }
+        }
+
+        @media (max-width: 640px) {
+            .show-header h1 { font-size: 28px; }
+            .main-image { height: 300px; }
+            .amenity-grid { grid-template-columns: 1fr; gap: 12px; }
+            .thumb-grid { grid-template-columns: repeat(3, 1fr); }
+            .thumb:nth-child(4) { display: none; }
         }
     </style>
     @endpush
