@@ -1,656 +1,775 @@
 <x-app-layout>
     @push('styles')
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        /* Hero and sections from welcome page... */
-        .hero-bg-overlay {
+
+        :root {
+            --ink:     #0f1117;
+            --ink-60:  rgba(15,17,23,0.6);
+            --ink-20:  rgba(15,17,23,0.12);
+            --cream:   #faf8f4;
+            --sand:    #f2ede4;
+            --blue:    #1a3a5c;
+            --blue-md: #2a5a8c;
+            --blue-lt: #e8f0f9;
+            --white:   #ffffff;
+            --r-sm: 10px;
+            --r-md: 16px;
+            --r-lg: 24px;
+            --r-xl: 36px;
+            --shadow-card: 0 2px 24px rgba(15,17,23,0.07), 0 1px 4px rgba(15,17,23,0.04);
+            --shadow-hover: 0 12px 40px rgba(15,17,23,0.13), 0 2px 8px rgba(15,17,23,0.06);
+            --transition: 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body { font-family: 'Outfit', sans-serif; color: var(--ink); background: var(--white); }
+
+        /* ── HERO ── */
+        .hero {
+            position: relative;
+            min-height: 92vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: var(--ink);
+        }
+        .hero-bg {
             position: absolute; inset: 0;
             background-size: cover;
-            background-position: center;
+            background-position: center 40%;
             background-repeat: no-repeat;
-            opacity: 1;
+            opacity: 0.55;
+            transform: scale(1.04);
+            animation: heroZoom 20s ease-in-out infinite alternate;
         }
-        .hero-shapes { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
-        .hero-shapes span {
-            position: absolute; border-radius: 50%;
-            background: rgba(255,255,255,0.06);
-            animation: floatShape 8s ease-in-out infinite;
+        @keyframes heroZoom { to { transform: scale(1.0); } }
+        .hero-vignette {
+            position: absolute; inset: 0;
+            background: linear-gradient(
+                to bottom,
+                rgba(15,17,23,0.35) 0%,
+                rgba(15,17,23,0.05) 40%,
+                rgba(15,17,23,0.55) 100%
+            );
         }
-        .hero-shapes span:nth-child(1) { width: 320px; height: 320px; top: -80px; right: -60px; animation-delay: 0s; }
-        .hero-shapes span:nth-child(2) { width: 200px; height: 200px; bottom: -40px; left: 10%; animation-delay: 2s; }
-        .hero-shapes span:nth-child(3) { width: 120px; height: 120px; top: 30%; left: 5%; animation-delay: 4s; }
-        @keyframes floatShape { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            color: var(--white);
+            padding: 0 24px 40px;
+            width: 100%;
+            max-width: 1000px;
+        }
+        .hero-eyebrow {
+            display: inline-flex; align-items: center; gap: 10px;
+            font-size: 11px; font-weight: 500; letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--blue-lt);
+            margin-bottom: 24px;
+            opacity: 0;
+            animation: fadeUp 0.8s 0.2s forwards;
+        }
+        .hero-eyebrow::before, .hero-eyebrow::after {
+            content: ''; display: block; width: 28px; height: 1px; background: var(--blue-lt); opacity: 0.7;
+        }
+        .hero-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(44px, 7vw, 84px);
+            font-weight: 300;
+            line-height: 1.05;
+            letter-spacing: -0.01em;
+            margin-bottom: 18px;
+            opacity: 0;
+            animation: fadeUp 0.9s 0.35s forwards;
+        }
+        .hero-title em { font-style: italic; font-weight: 300; }
+        .hero-sub {
+            font-size: 16px;
+            font-weight: 300;
+            color: rgba(255,255,255,0.75);
+            margin-bottom: 52px;
+            letter-spacing: 0.02em;
+            opacity: 0;
+            animation: fadeUp 0.9s 0.5s forwards;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
 
-        .hero-content { position: relative; text-align: center; color: #010203; padding: 60px 20px 30px; }
-        .hero-content h1 { font-family: 'Playfair Display', serif; font-size: clamp(32px, 5vw, 58px); font-weight: 700; line-height: 1.15; margin-bottom: 14px; text-shadow: 0 2px 20px rgba(0,0,0,0.3); }
-        .hero-content p { font-size: 17px; font-weight: 300; opacity: 0.88; margin-bottom: 36px; letter-spacing: 0.01em; }
-
-        /* ─── SEARCH BOX ─── */
+        /* ── SEARCH BOX ── */
+        .search-wrap {
+            opacity: 0;
+            animation: fadeUp 0.9s 0.65s forwards;
+        }
         .search-box {
-            background: #fff;
-            border-radius: 18px;
-            box-shadow: 0 12px 48px rgba(0,0,0,0.18);
-            padding: 10px 16px 16px;
-            max-width: 880px; margin: 0 auto;
-            position: relative; z-index: 2;
+            background: rgba(255,255,255,0.97);
+            backdrop-filter: blur(20px);
+            border-radius: var(--r-lg);
+            padding: 20px 20px 20px;
+            max-width: 900px;
+            margin: 0 auto;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.25);
         }
-        @media (max-width: 768px) { .search-box { padding: 24px 20px; border-radius: 24px; margin: 0 10px; } }
-
-        .search-fields { display: grid; grid-template-columns: 2fr 1fr 1fr 1.5fr auto; gap: 10px; align-items: end; }
-        @media (max-width: 1024px) { .search-fields { grid-template-columns: 1fr 1fr; gap: 16px; } }
-        @media (max-width: 640px) { .search-fields { grid-template-columns: 1fr; } }
-
-        .search-field label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
-        .search-field input, .search-field select {
-            width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 12px;
-            font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text);
-            background: #fff; outline: none; transition: border-color .2s;
+        .search-label-row {
+            display: grid;
+            grid-template-columns: 2fr 1.4fr 1.4fr 1.4fr auto;
+            gap: 10px;
+            align-items: end;
         }
-        .search-field input:focus, .search-field select:focus { border-color: var(--blue); }
-        .btn-search { background: var(--blue); color: #fff; border: none; cursor: pointer; border-radius: 12px; padding: 14px 28px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background .2s, transform .15s; white-space: nowrap; }
-        @media (max-width: 1024px) { .btn-search { grid-column: span 2; } }
-        @media (max-width: 640px) { .btn-search { grid-column: span 1; padding: 16px; margin-top: 8px; } }
-        .btn-search:hover { background: var(--blue-dark); transform: translateY(-1px); }
-eY(-1px); }
+        @media (max-width: 900px) { .search-label-row { grid-template-columns: 1fr 1fr; gap: 14px; } }
+        @media (max-width: 560px) { .search-label-row { grid-template-columns: 1fr; } }
+        .sf label {
+            display: block;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--ink-60);
+            margin-bottom: 7px;
+        }
+        .sf input, .sf select {
+            width: 100%;
+            padding: 13px 15px;
+            border: 1.5px solid var(--ink-20);
+            border-radius: var(--r-sm);
+            font-family: 'Outfit', sans-serif;
+            font-size: 14px;
+            color: var(--ink);
+            background: var(--cream);
+            outline: none;
+            transition: border-color var(--transition), background var(--transition);
+        }
+        .sf input:focus, .sf select:focus {
+            border-color: var(--blue-md);
+            background: var(--white);
+        }
+        .btn-check {
+            background: var(--ink);
+            color: var(--white);
+            border: none;
+            border-radius: var(--r-sm);
+            padding: 14px 26px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+        }
+        .btn-check:hover {
+            background: var(--blue);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(15,17,23,0.25);
+        }
+        @media (max-width: 900px) { .btn-check { grid-column: span 2; } }
+        @media (max-width: 560px) { .btn-check { grid-column: span 1; justify-content: center; } }
 
-        /* ─── SECTION COMMONS ─── */
-        .section { padding: 80px 40px; }
-        @media (max-width: 768px) { .section { padding: 60px 20px; } }
-
-        .section-alt { background: var(--bg); }
-        .section-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 40px; }
-        @media (max-width: 640px) { .section-header { flex-direction: column; align-items: flex-start; gap: 16px; } }
-
-        .section-title { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; color: var(--text); }
-        @media (max-width: 640px) { .section-title { font-size: 26px; } }
-
-        .section-subtitle { font-size: 15px; color: var(--muted); margin-top: 6px; }
-        .section-link { font-size: 14px; font-weight: 600; color: var(--blue); text-decoration: none; display: flex; align-items: center; gap: 4px; }
-        .section-link:hover { text-decoration: underline; }
+        /* ── SECTION SCAFFOLDING ── */
+        .section { padding: 96px 48px; }
+        .section-alt { background: var(--cream); }
+        @media (max-width: 768px) { .section { padding: 64px 24px; } }
         .container { max-width: 1200px; margin: 0 auto; }
+        .sec-head { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 48px; }
+        @media (max-width: 600px) { .sec-head { flex-direction: column; align-items: flex-start; gap: 18px; } }
+        .sec-eyebrow {
+            font-size: 10px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase;
+            color: var(--blue-md); margin-bottom: 10px;
+        }
+        .sec-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(28px, 4vw, 44px);
+            font-weight: 400;
+            line-height: 1.15;
+            color: var(--ink);
+        }
+        .sec-sub { font-size: 14px; color: var(--ink-60); margin-top: 6px; font-weight: 300; }
+        .sec-link {
+            font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+            color: var(--ink); text-decoration: none;
+            display: flex; align-items: center; gap: 6px;
+            border-bottom: 1px solid var(--ink-20);
+            padding-bottom: 2px;
+            transition: color var(--transition), border-color var(--transition);
+            white-space: nowrap;
+        }
+        .sec-link:hover { color: var(--blue-md); border-color: var(--blue-md); }
 
-        /* ─── WHY TRUST ─── */
-        .trust-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
-        .trust-card { text-align: center; padding: 32px 24px; border-radius: var(--radius); border: 1.5px solid var(--border); transition: box-shadow .25s, transform .25s; }
-        .trust-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-4px); }
-        .trust-icon { width: 56px; height: 56px; margin: 0 auto 16px; background: var(--blue-light); border-radius: 16px; display: flex; align-items: center; justify-content: center; }
-        .trust-icon i { font-size: 22px; color: var(--blue); }
-        .trust-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
-        .trust-card p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+        /* ── TRUST TRIO ── */
+        .trust-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        @media (max-width: 768px) { .trust-grid { grid-template-columns: 1fr; } }
+        .trust-card {
+            padding: 36px 28px;
+            border: 1px solid var(--ink-20);
+            border-radius: var(--r-lg);
+            background: var(--white);
+            transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+        }
+        .trust-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-hover); border-color: var(--blue-md); }
+        .trust-icon {
+            width: 52px; height: 52px;
+            border-radius: 14px;
+            background: var(--blue);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 20px;
+        }
+        .trust-icon i { font-size: 20px; color: #ffffff; }
+        .trust-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+        .trust-card p { font-size: 14px; color: var(--ink-60); line-height: 1.65; font-weight: 300; }
 
-        /* ─── FILTER TABS ─── */
-        .filter-tabs { display: flex; gap: 8px; margin-bottom: 28px; flex-wrap: wrap; }
-        .filter-tab { padding: 8px 18px; border-radius: 40px; border: 1.5px solid var(--border); background: #fff; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all .2s; color: var(--muted); }
-        .filter-tab.active, .filter-tab:hover { background: var(--blue); color: #fff; border-color: var(--blue); }
+        /* ── FILTER TABS ── */
+        .filter-tabs { display: flex; gap: 8px; margin-bottom: 32px; flex-wrap: wrap; }
+        .filter-tab {
+            padding: 8px 20px;
+            border-radius: 40px;
+            border: 1.5px solid var(--ink-20);
+            background: transparent;
+            font-family: 'Outfit', sans-serif;
+            font-size: 12px; font-weight: 500; letter-spacing: 0.06em;
+            cursor: pointer; transition: all var(--transition);
+            color: var(--ink-60);
+        }
+        .filter-tab.active, .filter-tab:hover { background: var(--ink); color: var(--white); border-color: var(--ink); }
 
-        /* ─── DESTINATION CARDS ─── */
-        .dest-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-        .dest-card { border-radius: var(--radius); overflow: hidden; position: relative; aspect-ratio: 3/4; background: linear-gradient(135deg, #c9d6e8, #a8bbd6); cursor: pointer; transition: transform .3s, box-shadow .3s; }
-        .dest-card:hover { transform: translateY(-6px) scale(1.01); box-shadow: 0 16px 48px rgba(0,0,0,0.18); }
-        .dest-card-img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s; }
-        .dest-card:hover .dest-card-img { transform: scale(1.07); }
-        .dest-card-placeholder { width: 100%; height: 100%; background: linear-gradient(135deg, var(--blue-light), #c8d8f8); display: flex; align-items: center; justify-content: center; }
-        .dest-card-placeholder i { font-size: 48px; color: var(--blue); opacity: 0.4; }
-        .dest-card-overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 24px 18px 18px; background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%); color: #fff; }
-        .dest-card-overlay h3 { font-size: 17px; font-weight: 700; }
-        .dest-card-overlay p { font-size: 12px; opacity: 0.85; margin-top: 2px; }
-        .dest-badge { position: absolute; top: 14px; left: 14px; background: var(--gold); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
-
-        /* ─── DEALS ─── */
-        .deals-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-        .deal-card { border-radius: var(--radius); overflow: hidden; border: 1.5px solid var(--border); background: #fff; transition: box-shadow .25s, transform .25s; cursor: pointer; }
-        .deal-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-4px); }
-        .deal-img-wrap { aspect-ratio: 16/10; background: linear-gradient(135deg, #d4e4f5, #b8cfe8); overflow: hidden; position: relative; }
-        .deal-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s; }
-        .deal-card:hover .deal-img-wrap img { transform: scale(1.07); }
-        .deal-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-        .deal-img-placeholder i { font-size: 36px; color: var(--blue); opacity: 0.35; }
-        .deal-fav { position: absolute; top: 10px; right: 10px; width: 32px; height: 32px; background: rgba(255,255,255,0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .deal-fav i { font-size: 14px; color: #e74c3c; }
-        .deal-status { position: absolute; top: 10px; left: 10px; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
-        .status-available { background: #d4f5e8; color: #16a34a; }
-        .status-limited { background: #fff3cd; color: #d97706; }
-        .deal-body { padding: 14px 16px; }
-        .deal-body h3 { font-size: 14px; font-weight: 700; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .deal-location { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 4px; margin-bottom: 10px; }
-        .deal-footer { display: flex; align-items: center; justify-content: space-between; }
-        .deal-rating { display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; }
-        .deal-rating i { color: var(--gold); font-size: 12px; }
-        .deal-price { font-size: 13px; color: var(--muted); }
-        .deal-price strong { font-size: 17px; color: var(--blue); font-weight: 700; }
-
-        /* ─── PROMO BANDS ─── */
-        .promo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-        .promo-card { background: var(--blue-light); border-radius: var(--radius); padding: 22px 20px; border: 1.5px solid #d0e3ff; }
-        .promo-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 6px; color: var(--blue); }
-        .promo-card p { font-size: 13px; color: var(--muted); line-height: 1.5; }
-
-        /* ─── SIGHTS ─── */
-        .sights-grid { display: grid; grid-template-columns: repeat(3, 1fr) repeat(3, 1fr); grid-template-rows: 1fr 1fr; gap: 14px; }
-        .sight-card { border-radius: var(--radius); overflow: hidden; position: relative; cursor: pointer; transition: transform .3s; }
-        .sight-card:nth-child(1), .sight-card:nth-child(4) { grid-column: span 2; }
-        .sight-card:hover { transform: scale(1.02); }
-        .sight-img-wrap { aspect-ratio: 16/9; background: linear-gradient(135deg, #c5d8ee, #a3bcd6); overflow: hidden; }
-        .sight-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-        .sight-img-placeholder i { font-size: 40px; color: var(--blue); opacity: 0.3; }
-        .sight-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
-        .sight-overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 14px; background: linear-gradient(to top, rgba(0,0,0,0.65), transparent); color: #fff; }
-        .sight-overlay h3 { font-size: 15px; font-weight: 700; }
-        .sight-flag { font-size: 14px; margin-left: 4px; }
-
-        /* ─── BARCELONA THINGS ─── */
-        .things-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; }
-        .thing-card { border-radius: var(--radius); overflow: hidden; text-align: center; cursor: pointer; transition: transform .25s; }
-        .thing-card:hover { transform: translateY(-4px); }
-        .thing-img-wrap { aspect-ratio: 1; background: linear-gradient(135deg, #d8e8f5, #b8cde6); border-radius: var(--radius); overflow: hidden; margin-bottom: 10px; }
-        .thing-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-        .thing-img-placeholder i { font-size: 32px; color: var(--blue); opacity: 0.35; }
-        .thing-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
-        .thing-card span { font-size: 13px; font-weight: 500; color: var(--text); }
-
-        /* ─── EXPLORE IN MOTION ─── */
-        .motion-section { background: #0a1a2e; color: #fff; padding: 64px 40px; }
-        .motion-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
-        .motion-content .section-title { color: #fff; font-size: 36px; line-height: 1.2; }
-        .motion-content p { color: rgba(255,255,255,0.7); font-size: 15px; margin: 16px 0 28px; }
-        .btn-outline-white { background: none; border: 2px solid rgba(255,255,255,0.4); color: #fff; border-radius: 10px; padding: 12px 26px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s; }
-        .btn-outline-white:hover { background: rgba(255,255,255,0.1); border-color: #fff; }
-        .motion-images { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .motion-img-card { border-radius: 12px; overflow: hidden; aspect-ratio: 4/3; background: linear-gradient(135deg, #1a3a5c, #2a5080); position: relative; }
-        .motion-img-card.tall { aspect-ratio: 3/4; }
-        .motion-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-        .motion-img-placeholder i { font-size: 36px; color: rgba(255,255,255,0.3); }
-        .motion-img-card img { width: 100%; height: 100%; object-fit: cover; }
-        .motion-img-label { position: absolute; bottom: 10px; left: 12px; color: #fff; font-size: 12px; font-weight: 600; }
-        .motion-img-rating { display: flex; gap: 2px; margin-top: 2px; }
-        .motion-img-rating i { font-size: 10px; color: var(--gold); }
-
-        /* ─── HOMES GUESTS LOVE ─── */
-        .homes-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-        @media (max-width: 1024px) { .homes-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 640px) { .homes-grid { grid-template-columns: 1fr; } }
-
-        /* ─── TESTIMONIAL ─── */
-        .testimonial-section { background: var(--bg); padding: 64px 40px; text-align: center; }
-        .testimonial-inner { max-width: 640px; margin: 0 auto; }
-        .testimonial-top { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
-        .testimonial-avatars { display: flex; justify-content: center; gap: -10px; margin-bottom: 20px; }
-        .testimonial-avatars img, .testimonial-avatar-placeholder {
-            width: 44px; height: 44px; border-radius: 50%; border: 3px solid #fff;
-            margin-left: -10px; background: linear-gradient(135deg, var(--blue-light), #b8d0ff);
+        /* ── APARTMENT DESTINATION CARDS ── */
+        .dest-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+        @media (max-width: 1100px) { .dest-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 560px) { .dest-grid { grid-template-columns: 1fr; } }
+        .dest-card {
+            border-radius: var(--r-lg);
+            overflow: hidden;
+            position: relative;
+            aspect-ratio: 3/4;
+            background: var(--sand);
+            cursor: pointer;
+            display: block;
+            text-decoration: none;
+            transition: transform var(--transition), box-shadow var(--transition);
+        }
+        .dest-card:hover { transform: translateY(-6px) scale(1.01); box-shadow: var(--shadow-hover); }
+        .dest-card-img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.6s; }
+        .dest-card:hover .dest-card-img { transform: scale(1.06); }
+        .dest-placeholder {
+            width: 100%; height: 100%;
+            background: var(--sand);
             display: flex; align-items: center; justify-content: center;
         }
-        .testimonial-avatars .testimonial-avatar-placeholder:first-child { margin-left: 0; }
-        .testimonial-avatar-placeholder i { font-size: 18px; color: var(--blue); }
-        .testimonial-main { position: relative; padding: 32px; background: #fff; border-radius: 20px; box-shadow: var(--shadow); }
-        .testimonial-main::before { content: '\201C'; position: absolute; top: -16px; left: 28px; font-size: 80px; color: var(--blue); font-family: 'Playfair Display', serif; line-height: 1; opacity: 0.15; }
-        .testimonial-main p { font-size: 16px; color: var(--text); line-height: 1.7; font-style: italic; }
-        .testimonial-author { margin-top: 20px; }
-        .testimonial-author strong { display: block; font-weight: 700; font-size: 15px; }
-        .testimonial-author span { font-size: 13px; color: var(--muted); }
-        .testimonial-stars { display: flex; justify-content: center; gap: 3px; margin-top: 8px; }
-        .testimonial-stars i { color: var(--gold); font-size: 14px; }
-
-        .testimonial-stars i { color: var(--gold); font-size: 14px; }
-
-        /* ─── CAROUSEL ARROWS ─── */
-        .section-nav { display: flex; gap: 8px; }
-        .nav-btn { width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--border); background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
-        .nav-btn:hover { background: var(--blue); border-color: var(--blue); color: #fff; }
-        .nav-btn i { font-size: 12px; color: inherit; }
-
-        /* ─── RESPONSIVE ─── */
-        @media (max-width: 1024px) {
-            .dest-grid, .deals-grid, .homes-grid { grid-template-columns: repeat(2, 1fr); }
-            .things-grid { grid-template-columns: repeat(3, 1fr); }
-            .footer-top { grid-template-columns: 1fr 1fr; }
-            .motion-inner { grid-template-columns: 1fr; }
+        .dest-placeholder i { font-size: 44px; color: var(--ink-20); }
+        .dest-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to top, rgba(15,17,23,0.78) 0%, rgba(15,17,23,0) 55%);
+            padding: 20px 18px 22px;
+            display: flex; flex-direction: column; justify-content: flex-end;
         }
-        @media (max-width: 768px) {
-            .navbar { padding: 0 20px; }
-            .navbar-links { display: none; }
-            .section { padding: 48px 20px; }
-            .search-fields { grid-template-columns: 1fr 1fr; }
-            .trust-grid, .promo-grid { grid-template-columns: 1fr; }
-            .sights-grid { grid-template-columns: 1fr 1fr; }
-            .sights-grid .sight-card:nth-child(1), .sights-grid .sight-card:nth-child(4) { grid-column: span 1; }
-            .footer-top { grid-template-columns: 1fr; }
-            .footer-bottom { flex-direction: column; gap: 16px; }
-        }
-        @media (max-width: 480px) {
-            .dest-grid, .deals-grid { grid-template-columns: 1fr; }
-            .things-grid { grid-template-columns: repeat(2, 1fr); }
-            .hero-content h1 { font-size: 32px; }
-            .section-title { font-size: 24px; }
+        .dest-overlay h3 { font-size: 17px; font-weight: 600; color: var(--white); line-height: 1.2; margin-bottom: 4px; }
+        .dest-overlay p { font-size: 12px; color: rgba(255,255,255,0.7); font-weight: 300; }
+        .dest-badge {
+            position: absolute; top: 14px; left: 14px;
+            background: var(--blue-md);
+            color: var(--white);
+            font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+            padding: 4px 11px; border-radius: 20px;
         }
 
-        /* ─── ANIMATIONS ─── */
-        /* ─── AUTH MODAL ─── */
-        .auth-modal-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+        /* ── DEAL CARDS ── */
+        .deals-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+        @media (max-width: 1100px) { .deals-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 560px) { .deals-grid { grid-template-columns: 1fr; } }
+        .deal-card {
+            border-radius: var(--r-md);
+            overflow: hidden;
+            border: 1px solid var(--ink-20);
+            background: var(--white);
+            cursor: pointer;
+            display: block;
+            text-decoration: none;
+            transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+        }
+        .deal-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); border-color: var(--blue-md); }
+        .deal-img-wrap { aspect-ratio: 16/10; overflow: hidden; position: relative; background: var(--sand); }
+        .deal-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.55s; }
+        .deal-card:hover .deal-img-wrap img { transform: scale(1.06); }
+        .deal-no-img { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+        .deal-no-img i { font-size: 32px; color: var(--ink-20); }
+        .deal-fav {
+            position: absolute; top: 11px; right: 11px;
+            width: 30px; height: 30px; border-radius: 50%;
+            background: rgba(255,255,255,0.9);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; border: none;
+            transition: transform var(--transition);
+        }
+        .deal-fav:hover { transform: scale(1.15); }
+        .deal-fav i { font-size: 13px; color: #e05252; }
+        .deal-status {
+            position: absolute; top: 11px; left: 11px;
+            font-size: 10px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase;
+            padding: 4px 10px; border-radius: 20px;
+        }
+        .status-available { background: #dcf5e7; color: #166534; }
+        .status-limited   { background: #fef3c7; color: #92400e; }
+        .deal-body { padding: 14px 16px 16px; }
+        .deal-body h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .deal-location { font-size: 12px; color: var(--ink-60); display: flex; align-items: center; gap: 5px; margin-bottom: 12px; font-weight: 300; }
+        .deal-foot { display: flex; align-items: center; justify-content: space-between; }
+        .deal-rating { display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; }
+        .deal-rating i { color: var(--blue-md); font-size: 11px; }
+        .deal-price { font-size: 12px; color: var(--ink-60); }
+        .deal-price strong { font-size: 18px; color: var(--ink); font-weight: 600; }
+
+        /* ── AMENITIES ── */
+        .amenity-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        @media (max-width: 900px) { .amenity-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 480px) { .amenity-grid { grid-template-columns: 1fr; } }
+        .amenity-card {
+            background: var(--white);
+            border: 1px solid var(--ink-20);
+            border-radius: var(--r-lg);
+            padding: 32px 24px;
+            text-align: center;
+            transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+        }
+        .amenity-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); border-color: var(--blue-md); }
+        .amenity-icon {
+            width: 60px; height: 60px; border-radius: 50%;
+            background: var(--blue);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 18px;
+        }
+        .amenity-icon i { font-size: 22px; color: #ffffff; }
+        .amenity-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+        .amenity-card p { font-size: 13px; color: var(--ink-60); line-height: 1.6; font-weight: 300; }
+
+        /* ── NEIGHBORHOOD ── */
+        .nbhd-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; }
+        @media (max-width: 900px) { .nbhd-wrap { grid-template-columns: 1fr; gap: 40px; } }
+        .nbhd-img { width: 100%; height: 500px; object-fit: cover; border-radius: var(--r-xl); display: block; }
+        .nbhd-item { display: flex; gap: 16px; align-items: flex-start; margin-top: 28px; }
+        .nbhd-num {
+            flex-shrink: 0;
+            width: 36px; height: 36px; border-radius: 50%;
+            background: var(--blue-lt);
+            color: var(--blue);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 16px; font-weight: 600; font-style: italic;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .nbhd-item h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+        .nbhd-item p { font-size: 13px; color: var(--ink-60); font-weight: 300; line-height: 1.6; }
+
+        /* ── TESTIMONIAL ── */
+        .testimonial-section { background: var(--ink); padding: 96px 48px; }
+        @media (max-width: 768px) { .testimonial-section { padding: 64px 24px; } }
+        .testimonial-inner { max-width: 660px; margin: 0 auto; text-align: center; }
+        .test-eyebrow { font-size: 10px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--blue-lt); margin-bottom: 40px; }
+        .test-avatars { display: flex; justify-content: center; margin-bottom: 32px; }
+        .test-av {
+            width: 42px; height: 42px; border-radius: 50%; border: 2.5px solid var(--ink);
+            background: #2a3b52;
+            display: flex; align-items: center; justify-content: center;
+            margin-left: -10px;
+        }
+        .test-av:first-child { margin-left: 0; }
+        .test-av i { font-size: 16px; color: rgba(255,255,255,0.4); }
+        .test-quote {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(22px, 3.5vw, 34px);
+            font-weight: 300;
+            font-style: italic;
+            line-height: 1.45;
+            color: var(--white);
+            margin-bottom: 32px;
+        }
+        .test-quote::before { content: '\201C'; color: var(--blue-lt); }
+        .test-quote::after  { content: '\201D'; color: var(--blue-lt); }
+        .test-author strong { display: block; font-size: 14px; font-weight: 600; color: var(--white); margin-bottom: 4px; }
+        .test-author span { font-size: 12px; color: rgba(255,255,255,0.45); }
+        .test-stars { display: flex; justify-content: center; gap: 4px; margin-bottom: 16px; }
+        .test-stars i { font-size: 13px; color: var(--blue-lt); }
+
+        /* ── NAV BTNS ── */
+        .nav-btns { display: flex; gap: 8px; }
+        .nav-btn {
+            width: 36px; height: 36px; border-radius: 50%;
+            border: 1.5px solid var(--ink-20);
+            background: transparent;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all var(--transition);
+        }
+        .nav-btn:hover { background: var(--ink); border-color: var(--ink); color: var(--white); }
+        .nav-btn i { font-size: 11px; }
+
+        /* ── FADE UP ANIM ── */
+        .fade-up { opacity: 0; transform: translateY(24px); transition: opacity 0.6s, transform 0.6s; }
+        .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+        /* ── AUTH MODAL ── */
+        .auth-overlay {
+            position: fixed; inset: 0;
+            background: rgba(15,17,23,0.6);
+            backdrop-filter: blur(6px);
             z-index: 2000;
             display: flex; align-items: center; justify-content: center;
-            opacity: 0; visibility: hidden; transition: opacity .3s, visibility .3s;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
         }
-        .auth-modal-overlay.active { opacity: 1; visibility: visible; }
+        .auth-overlay.active { opacity: 1; visibility: visible; }
         .auth-modal {
-            background: #fff; border-radius: 20px;
+            background: var(--white);
+            border-radius: var(--r-xl);
             width: 100%; max-width: 440px;
-            box-shadow: 0 24px 64px rgba(0,0,0,0.2);
-            transform: translateY(20px) scale(0.98);
-            transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
+            box-shadow: 0 32px 80px rgba(15,17,23,0.3);
+            transform: translateY(20px) scale(0.97);
+            transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
             overflow: hidden;
         }
-        .auth-modal-overlay.active .auth-modal { transform: translateY(0) scale(1); }
-        .auth-header {
+        .auth-overlay.active .auth-modal { transform: translateY(0) scale(1); }
+        .auth-top {
             display: flex; align-items: center; justify-content: center;
-            padding: 16px; border-bottom: 1px solid var(--border);
+            padding: 18px; border-bottom: 1px solid var(--ink-20);
             position: relative;
         }
-        .auth-header h3 { font-size: 16px; font-weight: 700; }
+        .auth-top h3 { font-size: 14px; font-weight: 600; letter-spacing: 0.03em; }
         .auth-close {
             position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
-            background: none; border: none; font-size: 16px; color: var(--muted);
-            cursor: pointer; width: 32px; height: 32px; border-radius: 50%;
+            background: none; border: none; width: 32px; height: 32px;
+            border-radius: 50%; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
-            transition: background .2s;
+            font-size: 14px; color: var(--ink-60);
+            transition: background var(--transition);
         }
-        .auth-close:hover { background: var(--bg); color: var(--text); }
+        .auth-close:hover { background: var(--cream); }
         .auth-body { padding: 32px; }
-        .auth-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; margin-bottom: 24px; }
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text); }
-        .form-group input {
-            width: 100%; padding: 14px 16px; border: 1.5px solid var(--border);
-            border-radius: 12px; font-family: 'DM Sans', sans-serif; font-size: 15px;
-            outline: none; transition: border-color .2s;
+        .auth-title { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 400; margin-bottom: 28px; }
+        .fg { margin-bottom: 18px; }
+        .fg label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-60); margin-bottom: 7px; }
+        .fg input {
+            width: 100%; padding: 14px 16px;
+            border: 1.5px solid var(--ink-20); border-radius: var(--r-sm);
+            font-family: 'Outfit', sans-serif; font-size: 14px;
+            color: var(--ink); background: var(--cream);
+            outline: none; transition: border-color var(--transition), background var(--transition);
         }
-        .form-group input:focus { border-color: var(--blue); }
-        .btn-auth {
-            width: 100%; padding: 14px; border: none; border-radius: 12px;
-            font-size: 15px; font-weight: 600; cursor: pointer;
-            font-family: 'DM Sans', sans-serif; transition: background .2s, transform .2s;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
+        .fg input:focus { border-color: var(--blue-md); background: var(--white); }
+        .btn-auth-main {
+            width: 100%; padding: 14px; border: none; border-radius: var(--r-sm);
+            background: var(--ink); color: var(--white);
+            font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600; letter-spacing: 0.05em;
+            cursor: pointer; margin-bottom: 24px;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: background var(--transition);
         }
-        .btn-auth-primary { background: var(--blue); color: #fff; margin-bottom: 24px; }
-        .btn-auth-primary:hover { background: var(--blue-dark); }
-        .btn-auth-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-        .auth-divider {
-            display: flex; align-items: center; text-align: center; margin-bottom: 24px;
-            color: var(--muted); font-size: 13px;
+        .btn-auth-main:hover { background: var(--blue); }
+        .btn-auth-main:disabled { opacity: 0.5; cursor: not-allowed; }
+        .divider {
+            display: flex; align-items: center; gap: 12px;
+            font-size: 12px; color: var(--ink-60); margin-bottom: 20px;
         }
-        .auth-divider::before, .auth-divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border); }
-        .auth-divider::before { margin-right: 12px; }
-        .auth-divider::after { margin-left: 12px; }
-        .btn-auth-social { background: #fff; border: 1.5px solid var(--border); color: var(--text); margin-bottom: 16px; font-weight: 500; }
-        .btn-auth-social:hover { background: var(--bg); border-color: #d1d5db; }
-        .btn-auth-social i { font-size: 18px; }
-        .btn-auth-social.btn-apple i { font-size: 20px; }
-        .auth-footer { font-size: 12px; color: var(--muted); line-height: 1.6; padding-top: 10px; }
-        .auth-footer a { color: var(--blue); text-decoration: underline; font-weight: 500; }
-
-        /* OTP STYLES */
-        .otp-inputs { display: flex; gap: 12px; justify-content: center; margin-bottom: 32px; margin-top: 16px; }
-        .otp-inputs input {
-            width: 56px; height: 64px; text-align: center; font-size: 32px;
-            font-weight: 700; border: 1.5px solid var(--border); border-radius: 12px;
-            color: var(--text); background: transparent;
+        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--ink-20); }
+        .social-btns { display: flex; gap: 10px; margin-bottom: 20px; }
+        .btn-social {
+            flex: 1; height: 44px; border: 1.5px solid var(--ink-20);
+            border-radius: var(--r-sm); background: var(--white);
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: background var(--transition), border-color var(--transition);
+            font-size: 17px;
         }
-        .otp-inputs input:focus { border-color: var(--blue); outline: none; }
-        .otp-sub { font-size: 14px; color: var(--text); margin-bottom: 24px; line-height: 1.6; }
-        .otp-sub strong { color: var(--text); font-weight: 700; }
-        .resend-link { font-size: 14px; font-weight: 600; color: var(--text); text-decoration: underline; cursor: pointer; display: inline-block; margin-bottom: 24px;}
-        .resend-link:hover { color: var(--blue); }
-
+        .btn-social:hover { background: var(--cream); border-color: var(--ink-60); }
+        .auth-note { font-size: 11px; color: var(--ink-60); line-height: 1.7; }
+        .auth-note a { color: var(--blue-md); text-decoration: underline; }
+        /* OTP */
+        .otp-row { display: flex; gap: 10px; justify-content: center; margin: 20px 0 28px; }
+        .otp-row input {
+            width: 56px; height: 64px; text-align: center;
+            font-size: 30px; font-weight: 600; letter-spacing: 0;
+            border: 1.5px solid var(--ink-20); border-radius: var(--r-sm);
+            background: var(--cream); color: var(--ink);
+            font-family: 'Outfit', sans-serif; outline: none;
+            transition: border-color var(--transition);
+        }
+        .otp-row input:focus { border-color: var(--blue-md); background: var(--white); }
+        .otp-note { font-size: 13px; color: var(--ink-60); margin-bottom: 22px; font-weight: 300; line-height: 1.6; }
+        .otp-note strong { color: var(--ink); font-weight: 600; }
+        .resend { font-size: 13px; font-weight: 600; text-decoration: underline; cursor: pointer; display: inline-block; margin-bottom: 22px; color: var(--ink-60); }
+        .resend:hover { color: var(--ink); }
         .modal-step { display: none; }
-        .modal-step.active { display: block; animation: stepFadeIn .3s; }
-        @keyframes stepFadeIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+        .modal-step.active { display: block; animation: stepIn 0.3s; }
+        @keyframes stepIn { from { opacity:0; transform: translateX(12px); } to { opacity:1; transform: none; } }
     </style>
     @endpush
 
-{{-- ═══════════════════ HERO ═══════════════════ --}}
-<section class="hero">
-    <div class="hero-bg-overlay" style="background-image: url('{{ asset('images/luxury-decor.jpg') }}');"></div>
-    <div class="hero-shapes"><span></span><span></span><span></span></div>
-    <div class="hero-content">
-        <h1>Your Home Away From Home</h1>
-        <p>Discover our exclusive fully-furnished premium apartments</p>
+    {{-- ══════════════ HERO ══════════════ --}}
+    <section class="hero">
+        <div class="hero-bg" style="background-image: url('{{ asset('images/luxury-decor.jpg') }}');"></div>
+        <div class="hero-vignette"></div>
+        <div class="hero-content">
+            <div class="hero-eyebrow"><span>Premium Serviced Apartments</span></div>
+            <h1 class="hero-title">Your Home<br><em>Away From Home</em></h1>
+            <p class="hero-sub">Discover our exclusive fully-furnished luxury apartments</p>
 
-        <div class="search-box">
-            <form action="{{ route('apartments.search') }}" method="GET">
-                <div class="search-fields" style="grid-template-columns: 2fr 1.5fr 1.5fr 1.5fr auto;">
-                    <div class="search-field">
-                        <label>Select Apartment</label>
-                        <select name="apartment_id">
-                            <option value="">All Apartments</option>
-                            @foreach($apartments as $apt)
-                                <option value="{{ $apt->id }}">{{ $apt->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="search-field">
-                        <label>Check In</label>
-                        <input type="date" name="check_in" required>
-                    </div>
-                    <div class="search-field">
-                        <label>Check Out</label>
-                        <input type="date" name="check_out" required>
-                    </div>
-                    <div class="search-field">
-                        <label>Guests</label>
-                        <select name="guests">
-                            <option value="2">1-2 Guests</option>
-                            <option value="4">3-4 Guests</option>
-                            <option value="6">5+ Guests</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn-search"><i class="fa-solid fa-calendar-check"></i> Check Availability</button>
+            <div class="search-wrap">
+                <div class="search-box">
+                    <form action="{{ route('apartments.search') }}" method="GET">
+                        <div class="search-label-row">
+                            <div class="sf">
+                                <label>Select Apartment</label>
+                                <select name="apartment_id">
+                                    <option value="">All Apartments</option>
+                                    @foreach($apartments as $apt)
+                                        <option value="{{ $apt->id }}">{{ $apt->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="sf">
+                                <label>Check In</label>
+                                <input type="date" name="check_in" required>
+                            </div>
+                            <div class="sf">
+                                <label>Check Out</label>
+                                <input type="date" name="check_out" required>
+                            </div>
+                            <div class="sf">
+                                <label>Guests</label>
+                                <select name="guests">
+                                    <option value="2">1–2 Guests</option>
+                                    <option value="4">3–4 Guests</option>
+                                    <option value="6">5+ Guests</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn-check">
+                                <i class="fa-solid fa-calendar-check"></i> Check Availability
+                            </button>
+                        </div>
+                    </form>
                 </div>
-            </form>
-        </div>
-    </div>
-</section>
-
-{{-- ═══════════════════ WHY TRUST ═══════════════════ --}}
-<section class="section">
-    <div class="container">
-        <div class="section-header"><div><h2 class="section-title">Why Stay With Us</h2></div></div>
-        <div class="trust-grid">
-            <div class="trust-card fade-up">
-                <div class="trust-icon"><i class="fa-solid fa-couch"></i></div>
-                <h3>Premium Furnishings</h3>
-                <p>Every apartment is designed with luxury, comfort, and sophisticated style in mind.</p>
-            </div>
-            <div class="trust-card fade-up" style="transition-delay:.1s">
-                <div class="trust-icon"><i class="fa-solid fa-wifi"></i></div>
-                <h3>High-Speed WiFi</h3>
-                <p>Stay seamlessly connected or work remotely with our complimentary fast internet.</p>
-            </div>
-            <div class="trust-card fade-up" style="transition-delay:.2s">
-                <div class="trust-icon"><i class="fa-solid fa-map-location-dot"></i></div>
-                <h3>Prime Locations</h3>
-                <p>All our properties are situated in the best, safest neighborhoods of the city.</p>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-{{-- ═══════════════════ TRENDING DESTINATIONS ═══════════════════ --}}
-<section class="section section-alt">
-    <div class="container">
-        <div class="section-header">
-            <div>
-                <h2 class="section-title">Our Exclusive Apartments</h2>
-                <p class="section-subtitle">Browse through our beautifully designed spaces</p>
+    {{-- ══════════════ WHY STAY ══════════════ --}}
+    <section class="section">
+        <div class="container">
+            <div class="sec-head">
+                <div>
+                    <p class="sec-eyebrow">Our Promise</p>
+                    <h2 class="sec-title">Why Stay With Us</h2>
+                </div>
             </div>
-            <a href="#" class="section-link">View all properties <i class="fa-solid fa-arrow-right"></i></a>
+            <div class="trust-grid">
+                <div class="trust-card fade-up">
+                    <div class="trust-icon"><i class="fa-solid fa-couch"></i></div>
+                    <h3>Premium Furnishings</h3>
+                    <p>Every apartment is curated with luxury, comfort, and sophisticated style in mind.</p>
+                </div>
+                <div class="trust-card fade-up" style="transition-delay:.1s">
+                    <div class="trust-icon"><i class="fa-solid fa-wifi"></i></div>
+                    <h3>High-Speed WiFi</h3>
+                    <p>Stay seamlessly connected or work remotely with complimentary fast internet.</p>
+                </div>
+                <div class="trust-card fade-up" style="transition-delay:.2s">
+                    <div class="trust-icon"><i class="fa-solid fa-map-location-dot"></i></div>
+                    <h3>Prime Locations</h3>
+                    <p>All properties are situated in the best, safest neighbourhoods of the city.</p>
+                </div>
+            </div>
         </div>
+    </section>
 
-        <div class="filter-tabs">
-            <button class="filter-tab active">All</button>
-            <button class="filter-tab">1 Bedroom</button>
-            <button class="filter-tab">2 Bedrooms</button>
-            <button class="filter-tab">Penthouses</button>
-        </div>
+    {{-- ══════════════ APARTMENTS GRID ══════════════ --}}
+    <section class="section section-alt">
+        <div class="container">
+            <div class="sec-head">
+                <div>
+                    <p class="sec-eyebrow">Properties</p>
+                    <h2 class="sec-title">Our Exclusive Apartments</h2>
+                    <p class="sec-sub">Browse our beautifully designed spaces</p>
+                </div>
+                <a href="#" class="sec-link">View all <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
 
-        <div class="dest-grid">
-            @forelse($apartments as $i => $apt)
-            <a href="{{ route('apartments.show', $apt->id) }}" class="dest-card fade-up" style="transition-delay:{{ $i * 0.1 }}s; text-decoration: none;">
-                @if($apt->images->count() > 0)
-                    <img src="{{ \Storage::url($apt->images->first()->image_path) }}" class="dest-card-img" alt="{{ $apt->name }}" style="width: 100%; height: 100%; object-fit: cover; display: block;">
-                @else
-                    <div class="dest-card-placeholder">
-                        <i class="fa-solid fa-building"></i>
+            <div class="filter-tabs">
+                <button class="filter-tab active">All</button>
+                <button class="filter-tab">1 Bedroom</button>
+                <button class="filter-tab">2 Bedrooms</button>
+                <button class="filter-tab">Penthouses</button>
+            </div>
+
+            <div class="dest-grid">
+                @forelse($apartments as $i => $apt)
+                <a href="{{ route('apartments.show', $apt->id) }}" class="dest-card fade-up" style="transition-delay:{{ $i * 0.08 }}s;">
+                    @if($apt->images->count() > 0)
+                        <img src="{{ \Storage::url($apt->images->first()->image_path) }}" class="dest-card-img" alt="{{ $apt->name }}">
+                    @else
+                        <div class="dest-placeholder"><i class="fa-solid fa-building"></i></div>
+                    @endif
+                    @if($i == 0)<div class="dest-badge">Popular</div>
+                    @elseif($i == 1)<div class="dest-badge">New</div>
+                    @endif
+                    <div class="dest-overlay">
+                        <h3>{{ $apt->name }}</h3>
+                        <p>{{ ucwords($apt->floor) }} Floor &bull; {{ $apt->bedrooms }} Bed &bull; {{ $apt->bathrooms }} Bath</p>
                     </div>
-                @endif
-                
-                @if($i == 0)
-                    <div class="dest-badge">Popular</div>
-                @elseif($i == 1)
-                    <div class="dest-badge">New</div>
-                @endif
-
-                <div class="dest-card-overlay">
-                    <h3>{{ $apt->name }}</h3>
-                    <p>{{ ucwords($apt->floor) }} Floor • {{ $apt->bedrooms }} Bed • {{ $apt->bathrooms }} Bath</p>
+                </a>
+                @empty
+                <div style="grid-column:span 4; text-align:center; padding:48px 24px; background:var(--cream); border-radius:var(--r-lg); border:1px dashed var(--ink-20);">
+                    <i class="fa-solid fa-hotel" style="font-size:40px; color:var(--ink-20); margin-bottom:14px; display:block;"></i>
+                    <p style="color:var(--ink-60); font-size:14px;">No apartments registered yet. Please check back soon.</p>
                 </div>
-            </a>
-            @empty
-                <div style="grid-column: span 4; text-align: center; padding: 40px; background: var(--blue-light); border-radius: 12px; color: var(--blue);">
-                    <i class="fa-solid fa-hotel fa-3x" style="margin-bottom: 16px; opacity: 0.5;"></i>
-                    <p>No apartments registered yet. Please check back later!</p>
-                </div>
-            @endforelse
-        </div>
-    </div>
-</section>
-
-{{-- ═══════════════════ DEALS FOR THE WEEKEND ═══════════════════ --}}
-<section class="section">
-    <div class="container">
-        <div class="section-header">
-            <div>
-                <h2 class="section-title">Available This Weekend</h2>
-                <p class="section-subtitle">Book your last-minute luxury getaway</p>
+                @endforelse
             </div>
-            <div style="display:flex; gap:12px; align-items:center;">
-                <div class="section-nav">
+        </div>
+    </section>
+
+    {{-- ══════════════ AVAILABLE THIS WEEKEND ══════════════ --}}
+    <section class="section">
+        <div class="container">
+            <div class="sec-head">
+                <div>
+                    <p class="sec-eyebrow">Last Minute</p>
+                    <h2 class="sec-title">Available This Weekend</h2>
+                    <p class="sec-sub">Book your luxury last-minute getaway</p>
+                </div>
+                <div class="nav-btns">
                     <button class="nav-btn"><i class="fa-solid fa-chevron-left"></i></button>
                     <button class="nav-btn"><i class="fa-solid fa-chevron-right"></i></button>
                 </div>
             </div>
-        </div>
 
-        <div class="deals-grid">
-            @foreach($apartments->take(4) as $i => $apt)
-            <a href="{{ route('apartments.show', $apt->id) }}" class="deal-card fade-up" style="transition-delay:{{ $i * 0.1 }}s; text-decoration: none;">
-                <div class="deal-img-wrap">
-                    @if($apt->images->count() > 0)
-                        <img src="{{ \Storage::url($apt->images->first()->image_path) }}" style="width: 100%; height: 100%; object-fit: cover;" alt="{{ $apt->name }}">
-                    @else
-                        <div class="deal-img-placeholder">
-                            <i class="fa-solid fa-building"></i>
-                        </div>
-                    @endif
-                    <div class="deal-fav"><i class="fa-solid fa-heart"></i></div>
-                    <span class="deal-status status-available">
-                        Available
-                    </span>
-                </div>
-                <div class="deal-body">
-                    <h3>{{ $apt->name }}</h3>
-                    <div class="deal-location"><i class="fa-solid fa-map-pin"></i> {{ $apt->floor }} Floor • Central</div>
-                    <div class="deal-footer">
-                        <div class="deal-rating">
-                            <i class="fa-solid fa-star"></i> 5.0
-                        </div>
-                        <div class="deal-price">
-                            <strong> ${{ number_format($apt->price_per_night) }}</strong><span style="font-size:11px; color:var(--muted)">/night</span>
+            <div class="deals-grid">
+                @foreach($apartments->take(4) as $i => $apt)
+                <a href="{{ route('apartments.show', $apt->id) }}" class="deal-card fade-up" style="transition-delay:{{ $i * 0.08 }}s;">
+                    <div class="deal-img-wrap">
+                        @if($apt->images->count() > 0)
+                            <img src="{{ \Storage::url($apt->images->first()->image_path) }}" alt="{{ $apt->name }}">
+                        @else
+                            <div class="deal-no-img"><i class="fa-solid fa-building"></i></div>
+                        @endif
+                        <button class="deal-fav" onclick="event.preventDefault(); this.querySelector('i').classList.toggle('fa-regular'); this.querySelector('i').classList.toggle('fa-solid');">
+                            <i class="fa-solid fa-heart"></i>
+                        </button>
+                        <span class="deal-status status-available">Available</span>
+                    </div>
+                    <div class="deal-body">
+                        <h3>{{ $apt->name }}</h3>
+                        <div class="deal-location"><i class="fa-solid fa-map-pin"></i> {{ $apt->floor }} Floor &bull; Central</div>
+                        <div class="deal-foot">
+                            <div class="deal-rating"><i class="fa-solid fa-star"></i> 5.0</div>
+                            <div class="deal-price"><strong>${{ number_format($apt->price_per_night) }}</strong><span style="font-size:11px; color:var(--ink-60)">/night</span></div>
                         </div>
                     </div>
-                </div>
-            </a>
-            @endforeach
-        </div>
-    </div>
-</section>
-
-{{-- ═══════════════════ AMENITIES (NEW) ═══════════════════ --}}
-<section class="section section-alt" id="amenities">
-    <div class="container">
-        <div class="section-header" style="justify-content: center; text-align: center; margin-bottom: 48px;">
-            <div>
-                <h2 class="section-title">World-Class Amenities</h2>
-                <p class="section-subtitle">Designed to provide the ultimate comfort and convenience</p>
+                </a>
+                @endforeach
             </div>
         </div>
+    </section>
 
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div class="text-center p-6 bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
-                <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 text-[#003B95]"><i class="fa-solid fa-person-swimming fa-2x"></i></div>
-                <h3 class="font-bold text-gray-900 mb-2">Private Pools</h3>
-                <p class="text-sm text-gray-500">Crystal clear infinity pools overlooking the ocean.</p>
-            </div>
-            <div class="text-center p-6 bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
-                <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 text-[#003B95]"><i class="fa-solid fa-spa fa-2x"></i></div>
-                <h3 class="font-bold text-gray-900 mb-2">Luxury Spa</h3>
-                <p class="text-sm text-gray-500">In-house spa treatments by world-renowned therapists.</p>
-            </div>
-            <div class="text-center p-6 bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
-                <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 text-[#003B95]"><i class="fa-solid fa-utensils fa-2x"></i></div>
-                <h3 class="font-bold text-gray-900 mb-2">Private Chef</h3>
-                <p class="text-sm text-gray-500">Fine dining prepared in your own kitchen by top chefs.</p>
-            </div>
-            <div class="text-center p-6 bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition">
-                <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 text-[#003B95]"><i class="fa-solid fa-shield-halved fa-2x"></i></div>
-                <h3 class="font-bold text-gray-900 mb-2">24/7 Security</h3>
-                <p class="text-sm text-gray-500">Your safety is our priority with around-the-clock protection.</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-{{-- ═══════════════════ NEIGHBORHOOD (NEW) ═══════════════════ --}}
-<section class="section" id="neighborhood">
-    <div class="container">
-        <div class="flex flex-col md:flex-row gap-12 items-center">
-            <div class="md:w-1/2">
-                <img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=2000&auto=format&fit=crop" class="rounded-3xl shadow-xl w-full h-[500px] object-cover" alt="Neighborhood">
-            </div>
-            <div class="md:w-1/2">
-                <span class="text-[#003B95] font-black uppercase tracking-widest text-xs mb-4 block">The Area</span>
-                <h2 class="text-4xl font-black text-gray-900 mb-6 leading-tight">Explore the Vibrant Heart of the City</h2>
-                <p class="text-gray-600 mb-8 text-lg leading-relaxed">
-                    CoastalCharmz properties are perfectly positioned to give you access to the best the city has to offer. From Michelin-star restaurants to hidden cultural gems, everything is just a short walk away.
-                </p>
-                <div class="space-y-4">
-                    <div class="flex gap-4 items-start">
-                        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 text-green-700 italic font-black">1</div>
-                        <div>
-                            <h4 class="font-bold text-gray-900">Fine Dining District</h4>
-                            <p class="text-sm text-gray-500">The world's best culinary experiences are just blocks away.</p>
-                        </div>
-                    </div>
-                    <div class="flex gap-4 items-start">
-                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 text-blue-700 italic font-black">2</div>
-                        <div>
-                            <h4 class="font-bold text-gray-900">Elite Shopping</h4>
-                            <p class="text-sm text-gray-500">Access to all luxury brands and boutiques in the main avenue.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-{{-- ═══════════════════ CONTACT (NEW) ═══════════════════ --}}
-{{-- 
-<section class="section section-alt" id="contact">
-    <div class="container">
-        <div class="bg-white rounded-[40px] shadow-2xl overflow-hidden flex flex-col md:flex-row border border-gray-100">
-            <div class="md:w-2/5 bg-[#003B95] p-12 text-white flex flex-col justify-between">
+    {{-- ══════════════ AMENITIES ══════════════ --}}
+    <section class="section section-alt" id="amenities">
+        <div class="container">
+            <div class="sec-head" style="justify-content:center; text-align:center;">
                 <div>
-                    <h2 class="text-3xl font-black mb-6">Let's Talk!</h2>
-                    <p class="opacity-80 mb-10">Have questions about our properties or need help with a booking? Our team is here to help 24/7.</p>
-                    
-                    <div class="space-y-6">
-                        <div class="flex gap-6 items-center">
-                            <i class="fa-solid fa-envelope fa-xl opacity-70"></i>
-                            <div>
-                                <p class="text-xs uppercase opacity-60 font-black tracking-widest">Email us</p>
-                                <p class="font-bold">hello@coastalcharmz.com</p>
-                            </div>
-                        </div>
-                        <div class="flex gap-6 items-center">
-                            <i class="fa-solid fa-phone fa-xl opacity-70"></i>
-                            <div>
-                                <p class="text-xs uppercase opacity-60 font-black tracking-widest">Call us</p>
-                                <p class="font-bold">+1 9899 998 999</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="flex gap-4 mt-12">
-                    <a href="#" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition"><i class="fa-brands fa-instagram"></i></a>
-                    <a href="#" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition"><i class="fa-brands fa-facebook"></i></a>
-                    <a href="#" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition"><i class="fa-brands fa-x-twitter"></i></a>
+                    <p class="sec-eyebrow">Inclusions</p>
+                    <h2 class="sec-title">World-Class Amenities</h2>
+                    <p class="sec-sub">Designed to provide the ultimate comfort and convenience</p>
                 </div>
             </div>
-            
-            <div class="md:w-3/5 p-12">
-                @if(session('success'))
-                    <div class="bg-green-50 border border-green-200 text-green-700 px-6 py-4 rounded-2xl mb-8 flex items-center gap-4">
-                        <i class="fa-solid fa-circle-check fa-xl"></i>
-                        <p class="font-bold">{{ session('success') }}</p>
-                    </div>
-                @endif
-
-                <form action="{{ route('contact.store') }}" method="POST" class="space-y-6">
-                    @csrf
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-2">
-                            <label class="text-xs font-black uppercase text-gray-500 tracking-widest">Full Name</label>
-                            <input type="text" name="name" required class="w-full bg-gray-50 border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-[#003B95] transition" placeholder="John Doe">
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-xs font-black uppercase text-gray-500 tracking-widest">Email Address</label>
-                            <input type="email" name="email" required class="w-full bg-gray-50 border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-[#003B95] transition" placeholder="john@example.com">
-                        </div>
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-xs font-black uppercase text-gray-500 tracking-widest">Message</label>
-                        <textarea name="message" required rows="4" class="w-full bg-gray-50 border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-[#003B95] transition" placeholder="How can we help you?"></textarea>
-                    </div>
-                    <button type="submit" class="w-full bg-[#003B95] text-white font-black py-5 rounded-2xl hover:bg-[#002b6d] transition shadow-xl flex items-center justify-center gap-3">
-                        <span>Send Message</span>
-                        <i class="fa-solid fa-paper-plane"></i>
-                    </button>
-                </form>
+            <div class="amenity-grid">
+                <div class="amenity-card fade-up">
+                    <div class="amenity-icon"><i class="fa-solid fa-person-swimming"></i></div>
+                    <h3>Private Pools</h3>
+                    <p>Crystal-clear infinity pools with breathtaking views.</p>
+                </div>
+                <div class="amenity-card fade-up" style="transition-delay:.08s">
+                    <div class="amenity-icon"><i class="fa-solid fa-spa"></i></div>
+                    <h3>Luxury Spa</h3>
+                    <p>In-house spa treatments by world-renowned therapists.</p>
+                </div>
+                <div class="amenity-card fade-up" style="transition-delay:.16s">
+                    <div class="amenity-icon"><i class="fa-solid fa-utensils"></i></div>
+                    <h3>Private Chef</h3>
+                    <p>Fine dining prepared in your own kitchen by top chefs.</p>
+                </div>
+                <div class="amenity-card fade-up" style="transition-delay:.24s">
+                    <div class="amenity-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                    <h3>24/7 Security</h3>
+                    <p>Your safety is our priority with around-the-clock protection.</p>
+                </div>
             </div>
         </div>
-    </div>
-</section>
---}}
+    </section>
 
-
-
-{{-- ═══════════════════ TESTIMONIAL ═══════════════════ --}}
-<section class="testimonial-section">
-    <div class="container">
-        <div class="testimonial-inner">
-            <p class="testimonial-top">What our guests think of Coastalcharmz</p>
-            <div class="testimonial-avatars">
-                @for($i = 0; $i < 5; $i++)
-                <div class="testimonial-avatar-placeholder"><i class="fa-solid fa-user"></i></div>
-                @endfor
+    {{-- ══════════════ NEIGHBOURHOOD ══════════════ --}}
+    <section class="section" id="neighborhood">
+        <div class="container">
+            <div class="nbhd-wrap">
+                <div>
+                    <img
+                        src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=1600&auto=format&fit=crop"
+                        class="nbhd-img" alt="City neighbourhood">
+                </div>
+                <div>
+                    <p class="sec-eyebrow">The Area</p>
+                    <h2 class="sec-title" style="font-size:clamp(32px,4vw,52px);">Explore the Vibrant<br>Heart of the City</h2>
+                    <p style="font-size:15px; color:var(--ink-60); font-weight:300; line-height:1.8; margin: 20px 0 8px;">
+                        CoastalCharmz properties are perfectly positioned to give you access to the best the city has to offer — from Michelin-starred restaurants to hidden cultural gems, everything is within reach.
+                    </p>
+                    <div class="nbhd-item fade-up">
+                        <div class="nbhd-num">1</div>
+                        <div>
+                            <h4>Fine Dining District</h4>
+                            <p>The world's best culinary experiences are just blocks away.</p>
+                        </div>
+                    </div>
+                    <div class="nbhd-item fade-up" style="transition-delay:.1s">
+                        <div class="nbhd-num">2</div>
+                        <div>
+                            <h4>Elite Shopping</h4>
+                            <p>Access to luxury brands and boutiques along the main avenue.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="testimonial-main">
-                <p>"This place is exactly like the picture posted on Coastalcharmz. Great service, we had a great stay!"</p>
-                <div class="testimonial-author">
+        </div>
+    </section>
+
+    {{-- ══════════════ TESTIMONIAL ══════════════ --}}
+    <section class="testimonial-section">
+        <div class="container">
+            <div class="testimonial-inner">
+                <p class="test-eyebrow">Guest Experiences</p>
+                <div class="test-avatars">
+                    @for($i = 0; $i < 5; $i++)
+                    <div class="test-av"><i class="fa-solid fa-user"></i></div>
+                    @endfor
+                </div>
+                <div class="test-stars">
+                    @for($i = 0; $i < 5; $i++)<i class="fa-solid fa-star"></i>@endfor
+                </div>
+                <p class="test-quote">This place is exactly like the picture posted on Coastalcharmz. Great service, we had a great stay!</p>
+                <div class="test-author">
                     <strong>Ethan Rogrinho</strong>
                     <span>🇧🇷 Brazil · Verified Guest</span>
                 </div>
-                <div class="testimonial-stars">
-                    @for($i = 0; $i < 5; $i++)
-                    <i class="fa-solid fa-star"></i>
-                    @endfor
-                </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
     @push('scripts')
     <script>
-        // Scroll animation observer
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+        // Scroll observer
+        const obs = new IntersectionObserver(entries => {
+            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
         }, { threshold: 0.1 });
-        document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+        document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
 
         // Filter tabs
         document.querySelectorAll('.filter-tab').forEach(tab => {
@@ -660,67 +779,31 @@ eY(-1px); }
             });
         });
 
-        // Search tabs
-        document.querySelectorAll('.search-tab').forEach(tab => {
-            tab.addEventListener('click', function() {
-                document.querySelectorAll('.search-tab').forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
-
-        // Favourite toggle
-        document.querySelectorAll('.deal-fav').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                const icon = this.querySelector('i');
-                icon.classList.toggle('fa-regular');
-                icon.classList.toggle('fa-solid');
-            });
-        });
-
-        // Auth Modal Logic
-        let authOverlay, step1, step2, emailInput, displayEmail, btnContinueEmail, otpInputs;
+        // ── AUTH MODAL ──
+        let authOverlay, step1, step2, emailInput, displayEmail, btnContinue, otpInputs;
 
         document.addEventListener('DOMContentLoaded', () => {
-            authOverlay = document.getElementById('authOverlay');
-            step1 = document.getElementById('authStep1');
-            step2 = document.getElementById('authStep2');
-            emailInput = document.getElementById('authEmail');
+            authOverlay  = document.getElementById('authOverlay');
+            step1        = document.getElementById('authStep1');
+            step2        = document.getElementById('authStep2');
+            emailInput   = document.getElementById('authEmail');
             displayEmail = document.getElementById('displayEmail');
-            btnContinueEmail = document.getElementById('btnContinueEmail');
+            btnContinue  = document.getElementById('btnContinueEmail');
 
-            // Close on overlay click
-            if (authOverlay) {
-                authOverlay.addEventListener('click', (e) => {
-                    if (e.target === authOverlay) window.closeAuthModal();
-                });
-            }
+            if (authOverlay) authOverlay.addEventListener('click', e => { if (e.target === authOverlay) window.closeAuthModal(); });
+            if (emailInput) emailInput.addEventListener('input', e => { btnContinue.disabled = !e.target.value.trim(); });
 
-            // Enable button based on input
-            if (emailInput) {
-                emailInput.addEventListener('input', (e) => {
-                    btnContinueEmail.disabled = e.target.value.trim() === '';
-                });
-            }
-
-            // OTP Input Logic
-            otpInputs = document.querySelectorAll('.otp-inputs input');
-            otpInputs.forEach((input, index) => {
-                input.addEventListener('keyup', (e) => {
+            otpInputs = document.querySelectorAll('.otp-row input');
+            otpInputs.forEach((inp, i) => {
+                inp.addEventListener('keyup', e => {
                     if (e.key >= 0 && e.key <= 9) {
-                        if (index < otpInputs.length - 1) {
-                            otpInputs[index + 1].focus();
-                        } else {
-                            // All filled, pretend to confirm code...
-                            const code = Array.from(otpInputs).map(i => i.value).join('');
-                            if(code.length === 4) {
-                                window.confirmOtp();
-                            }
+                        if (i < otpInputs.length - 1) otpInputs[i+1].focus();
+                        else {
+                            const code = Array.from(otpInputs).map(x => x.value).join('');
+                            if (code.length === 4) window.confirmOtp();
                         }
-                    } else if (e.key === 'Backspace') {
-                        if (index > 0 && input.value === '') {
-                            otpInputs[index - 1].focus();
-                        }
+                    } else if (e.key === 'Backspace' && i > 0 && inp.value === '') {
+                        otpInputs[i-1].focus();
                     }
                 });
             });
@@ -732,163 +815,96 @@ eY(-1px); }
             step1.classList.add('active');
             step2.classList.remove('active');
             emailInput.value = '';
-            btnContinueEmail.disabled = true;
+            btnContinue.disabled = true;
         };
-
         window.closeAuthModal = function() {
             if (!authOverlay) return;
             authOverlay.classList.remove('active');
-            setTimeout(() => {
-                step1.classList.remove('active');
-                step2.classList.remove('active');
-            }, 300);
+            setTimeout(() => { step1.classList.remove('active'); step2.classList.remove('active'); }, 300);
         };
-
         window.goStep2 = async function() {
             const email = emailInput.value.trim();
             if (!email) return;
-
-            btnContinueEmail.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
-            btnContinueEmail.disabled = true;
-
+            btnContinue.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending…';
+            btnContinue.disabled = true;
             try {
-                const res = await fetch('/auth/otp/send', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify({ email: email })
-                });
-
+                const res  = await fetch('/auth/otp/send', { method:'POST', headers:{'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content}, body: JSON.stringify({email}) });
                 const data = await res.json();
-                btnContinueEmail.innerHTML = 'Continue with email';
-                btnContinueEmail.disabled = false;
-
+                btnContinue.innerHTML = 'Continue with email';
+                btnContinue.disabled = false;
                 if (res.ok && data.success) {
-                    step1.classList.remove('active');
-                    step2.classList.add('active');
+                    step1.classList.remove('active'); step2.classList.add('active');
                     displayEmail.innerText = email;
-                    if (otpInputs) {
-                        otpInputs.forEach(i => i.value = '');
-                        setTimeout(() => otpInputs[0].focus(), 100);
-                    }
-                } else {
-                    alert(data.message || 'Error sending code.');
-                }
-            } catch (error) {
-                btnContinueEmail.innerHTML = 'Continue with email';
-                btnContinueEmail.disabled = false;
-                alert('Something went wrong. Please try again.');
-                console.error(error);
-            }
+                    if (otpInputs) { otpInputs.forEach(i => i.value = ''); setTimeout(() => otpInputs[0].focus(), 100); }
+                } else { alert(data.message || 'Error sending code.'); }
+            } catch(err) { btnContinue.innerHTML = 'Continue with email'; btnContinue.disabled = false; alert('Something went wrong.'); }
         };
-
         window.confirmOtp = async function() {
-            const btnConfirmCode = document.getElementById('btnConfirmCode');
+            const btn  = document.getElementById('btnConfirmCode');
             const code = Array.from(otpInputs).map(i => i.value).join('');
-            
             if (code.length !== 4) return;
-            
-            const originalText = btnConfirmCode.innerHTML;
-            if(btnConfirmCode) btnConfirmCode.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Confirming...';
-
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Confirming…';
             try {
-                const res = await fetch('/auth/otp/verify', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify({ email: emailInput.value.trim(), code: code })
-                });
-
+                const res  = await fetch('/auth/otp/verify', { method:'POST', headers:{'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content}, body: JSON.stringify({email: emailInput.value.trim(), code}) });
                 const data = await res.json();
-
-                if (res.ok && data.success) {
-                    window.location.href = data.redirect;
-                } else {
-                    if(btnConfirmCode) btnConfirmCode.innerHTML = originalText;
-                    alert(data.message || 'Invalid code. Please try again.');
-                }
-            } catch (error) {
-                if(btnConfirmCode) btnConfirmCode.innerHTML = originalText;
-                alert('Something went wrong verifying the code.');
-                console.error(error);
-            }
+                if (res.ok && data.success) { window.location.href = data.redirect; }
+                else { btn.innerHTML = orig; alert(data.message || 'Invalid code. Please try again.'); }
+            } catch(err) { btn.innerHTML = orig; alert('Something went wrong.'); }
         };
     </script>
     @endpush
 
-    {{-- ═══════════════════ AUTH MODAL HTML ═══════════════════ --}}
-    <div class="auth-modal-overlay" id="authOverlay">
+    {{-- ══════════════ AUTH MODAL HTML ══════════════ --}}
+    <div class="auth-overlay" id="authOverlay">
         <div class="auth-modal">
-            <!-- STEP 1: Email / Social -->
+            <!-- Step 1 -->
             <div class="modal-step active" id="authStep1">
-                <div class="auth-header">
+                <div class="auth-top">
                     <button class="auth-close" onclick="closeAuthModal()"><i class="fa-solid fa-xmark"></i></button>
-                    <h3>Sign in or sign up</h3>
+                    <h3>Sign in or create account</h3>
                 </div>
                 <div class="auth-body">
                     <h2 class="auth-title">Welcome to CoastalCharmz</h2>
-
-                    <div class="form-group">
+                    <div class="fg">
                         <label>Email address</label>
-                        <input type="email" id="authEmail" placeholder="e.g., mail@example.com" autocomplete="email">
+                        <input type="email" id="authEmail" placeholder="mail@example.com" autocomplete="email">
                     </div>
-
-                    <button class="btn-auth btn-auth-primary" id="btnContinueEmail" disabled onclick="goStep2()">
+                    <button class="btn-auth-main" id="btnContinueEmail" disabled onclick="goStep2()">
                         Continue with email
                     </button>
-
-                    <div class="auth-divider">or</div>
-
-                    <div style="display: flex; justify-content: space-between; gap: 16px;">
-                        <a href="{{ route('login') }}" class="btn-auth btn-auth-social" style="flex:1; text-decoration:none;" title="Continue with password">
-                            <i class="fa-solid fa-key"></i>
+                    <div class="divider">or</div>
+                    <div class="social-btns">
+                        <a href="{{ route('login') }}" class="btn-social" title="Password login" style="text-decoration:none;">
+                            <i class="fa-solid fa-key" style="color:var(--ink);"></i>
                         </a>
-
-                        <button class="btn-auth btn-auth-social" style="flex:1" title="Continue with Google">
-                            <i class="fa-brands fa-google" style="color:#DB4437;"></i>
-                        </button>
-                        <button class="btn-auth btn-auth-social btn-apple" style="flex:1" title="Continue with Apple">
-                            <i class="fa-brands fa-apple"></i>
-                        </button>
-                        <button class="btn-auth btn-auth-social" style="flex:1" title="Continue with Facebook">
-                            <i class="fa-brands fa-facebook" style="color:#1877F2;"></i>
-                        </button>
+                        <button class="btn-social" title="Google"><i class="fa-brands fa-google" style="color:#DB4437;"></i></button>
+                        <button class="btn-social" title="Apple"><i class="fa-brands fa-apple"></i></button>
+                        <button class="btn-social" title="Facebook"><i class="fa-brands fa-facebook" style="color:#1877F2;"></i></button>
                     </div>
-                    
-                    <div class="auth-footer">
-                        By moving forward, you agree to our <a href="#">Terms of Use</a> and <a href="#">Privacy Policy</a>.
-                    </div>
+                    <p class="auth-note">By continuing, you agree to our <a href="#">Terms of Use</a> and <a href="#">Privacy Policy</a>.</p>
                 </div>
             </div>
-
-            <!-- STEP 2: OTP Verification -->
+            <!-- Step 2 -->
             <div class="modal-step" id="authStep2">
-                <div class="auth-header">
+                <div class="auth-top">
                     <button class="auth-close" onclick="document.getElementById('authStep2').classList.remove('active'); document.getElementById('authStep1').classList.add('active');"><i class="fa-solid fa-chevron-left"></i></button>
-                    <h3>Let's confirm it's you</h3>
+                    <h3>Verify your identity</h3>
                 </div>
-                <div class="auth-body" style="padding-top:20px; text-align:center;">
-                    <h2 style="font-size:18px; font-weight:700; margin-bottom:12px;">Enter your verification code</h2>
-                    <p class="otp-sub">We've sent a 4-digit code to:<br><strong id="displayEmail">mail@example.com</strong></p>
-
-                    <div class="otp-inputs">
-                        <input type="text" maxlength="1" placeholder="-" />
-                        <input type="text" maxlength="1" placeholder="-" />
-                        <input type="text" maxlength="1" placeholder="-" />
-                        <input type="text" maxlength="1" placeholder="-" />
+                <div class="auth-body" style="text-align:center; padding-top:24px;">
+                    <h2 style="font-size:20px; font-weight:600; margin-bottom:12px;">Enter verification code</h2>
+                    <p class="otp-note">We sent a 4-digit code to:<br><strong id="displayEmail">mail@example.com</strong></p>
+                    <div class="otp-row">
+                        <input type="text" maxlength="1" placeholder="–">
+                        <input type="text" maxlength="1" placeholder="–">
+                        <input type="text" maxlength="1" placeholder="–">
+                        <input type="text" maxlength="1" placeholder="–">
                     </div>
-
-                    <span class="resend-link">Get a new code</span>
-
-                    <button class="btn-auth btn-auth-primary" id="btnConfirmCode" onclick="confirmOtp()">
-                        Continue
-                    </button>
+                    <span class="resend">Get a new code</span>
+                    <button class="btn-auth-main" id="btnConfirmCode" onclick="confirmOtp()">Continue</button>
                 </div>
             </div>
         </div>
     </div>
+
 </x-app-layout>
