@@ -7,26 +7,34 @@ use App\Models\User;
 
 class BookingPolicy
 {
-    /**
-     * Determine if the user can create a booking
-     */
     public function create(User $user): bool
     {
-        return in_array($user->role, ['user', 'admin']);
+        return in_array($user->role, ['user', 'admin'], true);
     }
 
-    /**
-     * Determine if the user can view this booking
-     */
     public function view(User $user, Booking $booking): bool
     {
         return $user->id === $booking->user_id || $user->isAdmin();
     }
 
-    /**
-     * Determine if the user can delete this booking
-     */
     public function delete(User $user, Booking $booking): bool
+    {
+        return $user->id === $booking->user_id || $user->isAdmin();
+    }
+
+    /**
+     * Only the guest who stayed may review, only after checking out, and only
+     * once. An admin cannot review on someone's behalf.
+     */
+    public function review(User $user, Booking $booking): bool
+    {
+        return $user->id === $booking->user_id && $booking->canBeReviewed();
+    }
+
+    /**
+     * Either party to the stay can use its message thread.
+     */
+    public function message(User $user, Booking $booking): bool
     {
         return $user->id === $booking->user_id || $user->isAdmin();
     }

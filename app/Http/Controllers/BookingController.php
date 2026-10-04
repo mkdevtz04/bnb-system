@@ -2,116 +2,118 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\DatesUnavailableException;
+use App\Http\Requests\StoreBookingRequest;
 use App\Models\Apartment;
 use App\Models\Booking;
-use App\Models\User;
-use App\Notifications\NewBookingNotification;
+use App\Services\AvailabilityService;
+use App\Services\BookingService;
+use App\Services\PricingService;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Notification;
 
 class BookingController extends Controller
 {
-    /**
-     * Show the form for creating a new booking
-     */
-    public function create(Apartment $apartment)
-    {
-        $this->authorize('create', Booking::class);
-
-        return view('bookings.create', compact('apartment'));
-    }
+    public function __construct(
+        private readonly BookingService $bookings,
+        private readonly PricingService $pricing,
+        private readonly AvailabilityService $availability,
+    ) {}
 
     /**
-     * Store a newly created booking in database
+     * Step one of the funnel: review the stay and the price before committing.
      */
-    public function store(Request $request)
+    public function create(Request $request, Apartment $apartment)
     {
         $this->authorize('create', Booking::class);
 
         $validated = $request->validate([
-            'apartment_id' => 'required|exists:apartments,id',
-            'check_in' => 'required|date|after:today',
-            'check_out' => 'required|date|after:check_in',
+            'check_in' => ['required', 'date_format:Y-m-d'],
+            'check_out' => ['required', 'date_format:Y-m-d', 'after:check_in'],
+            'guests' => ['nullable', 'integer', 'min:1'],
         ]);
 
-        $apartment = Apartment::findOrFail($validated['apartment_id']);
+        $checkIn = CarbonImmutable::parse($validated['check_in'])->startOfDay();
+        $checkOut = CarbonImmutable::parse($validated['check_out'])->startOfDay();
+        $guests = min((int) ($validated['guests'] ?? 1), $apartment->max_guests);
 
-        // Check if dates are already booked
-        $existingBooking = Booking::where('apartment_id', $apartment->id)
-            ->whereIn('status', ['confirmed', 'pending'])
-            ->where(function ($q) use ($request) {
-                $q->whereBetween('check_in', [$request->check_in, $request->check_out])
-                    ->orWhereBetween('check_out', [$request->check_in, $request->check_out])
-                    ->orWhere(function ($q) use ($request) {
-                        $q->where('check_in', '<=', $request->check_in)
-                            ->where('check_out', '>=', $request->check_out);
-                    });
-            })->exists();
-
-        if ($existingBooking) {
-            return back()->withErrors(['booking' => 'These dates are not available']);
+        if (! $this->availability->isAvailable($apartment, $checkIn, $checkOut)) {
+            return redirect()
+                ->route('apartments.show', $apartment)
+                ->withErrors(['dates' => 'Those dates are no longer available.']);
         }
 
-        // Calculate nights and total price
-        $checkIn = new \DateTime($validated['check_in']);
-        $checkOut = new \DateTime($validated['check_out']);
-        $nights = $checkIn->diff($checkOut)->days;
-        $totalPrice = $nights * $apartment->price_per_night;
+        // The summary the guest reads is the server's own quote, so the figure on
+        // screen is the figure that gets stored.
+        $quote = $this->pricing->quote($apartment, $checkIn, $checkOut, $guests);
 
-        // Create booking
-        $booking = auth()->user()->bookings()->create([
-            'apartment_id' => $apartment->id,
-            'check_in' => $validated['check_in'],
-            'check_out' => $validated['check_out'],
-            'nights' => $nights,
-            'total_price' => $totalPrice,
-            'status' => 'pending',
+        return view('bookings.create', [
+            'apartment' => $apartment->load('images'),
+            'checkIn' => $checkIn,
+            'checkOut' => $checkOut,
+            'guests' => $guests,
+            'quote' => $quote,
         ]);
-
-        // Notify Admin
-        $admins = User::where('role', 'admin')->get();
-        Notification::send($admins, new NewBookingNotification($booking));
-
-        return redirect()->route('bookings.confirmation', $booking)
-            ->with('success', 'Booking created! Your dates are now reserved pending admin confirmation.');
     }
 
-    /**
-     * Show booking confirmation page
-     */
+    public function store(StoreBookingRequest $request)
+    {
+        $apartment = Apartment::findOrFail($request->validated('apartment_id'));
+
+        try {
+            $booking = $this->bookings->create(
+                user: $request->user(),
+                apartment: $apartment,
+                checkIn: $request->checkIn(),
+                checkOut: $request->checkOut(),
+                guests: $request->guests(),
+            );
+        } catch (DatesUnavailableException $e) {
+            return back()->withInput()->withErrors(['dates' => $e->getMessage()]);
+        }
+
+        return redirect()
+            ->route('bookings.confirmation', $booking)
+            ->with('success', 'Your stay is reserved. We will confirm it shortly.');
+    }
+
     public function confirmation(Booking $booking)
     {
         $this->authorize('view', $booking);
 
-        return view('bookings.confirmation', compact('booking'));
+        return view('bookings.confirmation', [
+            'booking' => $booking->load('apartment.images', 'user'),
+        ]);
     }
 
-    /**
-     * Display user's booking history
-     */
-    public function history()
+    public function history(Request $request)
     {
-        $bookings = auth()->user()->bookings()
-            ->with('apartment')
-            ->latest()
-            ->paginate(10);
+        $filter = $request->string('filter')->toString();
 
-        return view('bookings.history', compact('bookings'));
+        $bookings = $request->user()->bookings()
+            ->with(['apartment.images', 'review'])
+            ->when($filter === 'upcoming', fn ($q) => $q->holding()->whereDate('check_in', '>=', today()))
+            ->when($filter === 'past', fn ($q) => $q->where('check_out', '<', today()))
+            ->when($filter === 'cancelled', fn ($q) => $q->where('status', 'cancelled'))
+            ->latest('check_in')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('bookings.history', compact('bookings', 'filter'));
     }
 
-    /**
-     * Cancel a booking
-     */
     public function cancel(Booking $booking)
     {
         $this->authorize('delete', $booking);
 
-        if ($booking->status !== 'pending' && $booking->status !== 'confirmed') {
-            return back()->withErrors(['booking' => 'Cannot cancel this booking']);
+        if (! $booking->canBeCancelled()) {
+            return back()->withErrors([
+                'booking' => 'This booking can no longer be cancelled.',
+            ]);
         }
 
-        $booking->update(['status' => 'cancelled']);
+        $this->bookings->cancel($booking, auth()->user());
 
-        return back()->with('success', 'Booking cancelled successfully');
+        return back()->with('success', 'Booking cancelled. Those dates are back on sale.');
     }
 }

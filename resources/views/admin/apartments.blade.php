@@ -1,127 +1,108 @@
 @extends('layouts.app')
 
+@section('title', 'Properties · Admin')
+
 @section('content')
-<div class="py-12">
-    <div class="max-w-7xl mx-auto px-4">
-        <div class="flex items-center justify-between mb-8">
-            <h1 class="text-4xl font-bold text-gray-900">Manage Apartments</h1>
-            <div class="flex space-x-4">
-                <a 
-                    href="{{ route('admin.apartments') }}"
-                    class="bg-gray-300 hover:bg-gray-400 text-gray-900 px-6 py-2 rounded-lg transition flex items-center"
-                >
-                    ← Back to Dashboard
-                </a>
-                <a 
-                    href="{{ route('admin.apartments.create') }}"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition font-bold flex items-center"
-                >
-                    + Add Apartment
-                </a>
-            </div>
+<div class="shell-wide" style="padding: 32px 16px 48px;">
+
+    <header class="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 style="font-size:28px;">Properties</h1>
+            <p class="muted" style="font-size:14.5px;">{{ $apartments->total() }} listed</p>
         </div>
+        <div class="flex gap-2">
+            <a href="{{ route('admin.apartments.create') }}" class="btn btn-primary">
+                <i class="fa-solid fa-plus"></i> Add property
+            </a>
+            <a href="{{ route('admin.dashboard') }}" class="btn btn-ghost">
+                <i class="fa-solid fa-chevron-left"></i> Dashboard
+            </a>
+        </div>
+    </header>
 
-        @if(session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-6" role="alert">
-                <span class="block sm:inline">{{ session('success') }}</span>
-            </div>
-        @endif
+    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        @forelse ($apartments as $apartment)
+            <article class="card overflow-hidden">
+                <div class="prop-media" style="aspect-ratio:3/2;">
+                    @if ($apartment->images->isNotEmpty())
+                        <img src="{{ Storage::url($apartment->images->first()->image_path) }}"
+                             alt="{{ $apartment->name }}" loading="lazy">
+                    @else
+                        <span class="prop-empty"><i class="fa-solid fa-building"></i></span>
+                    @endif
 
-        <!-- Apartments Grid -->
-        @if($apartments->count() > 0)
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                @foreach($apartments as $apartment)
-                    <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden">
-                        <!-- Image -->
-                        @if($apartment->images->count() > 0)
-                            <div class="h-40 bg-gray-200">
-                                <img src="{{ \Storage::url($apartment->images->first()->image_path) }}" alt="{{ $apartment->name }}" class="w-full h-full object-cover">
-                            </div>
-                        @else
-                            <div class="h-40 bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-                                <span class="text-5xl">🏢</span>
-                            </div>
+                    <span class="badge {{ $apartment->status === 'available' ? 'badge-success' : 'badge-warning' }}"
+                          style="position:absolute; top:10px; left:10px;">
+                        {{ $apartment->status === 'available' ? 'On sale' : 'Maintenance' }}
+                    </span>
+                </div>
+
+                <div class="card-pad">
+                    <div class="flex items-start justify-between gap-3">
+                        <h2 style="font-size:17px; line-height:1.3;">{{ $apartment->name }}</h2>
+                        @if ($apartment->reviews_avg_overall)
+                            <span class="score score-sm">{{ number_format($apartment->reviews_avg_overall, 1) }}</span>
                         @endif
+                    </div>
 
-                        <!-- Content -->
-                        <div class="p-6">
-                            <!-- Header -->
-                            <div class="flex items-start justify-between mb-3">
-                                <div>
-                                    <div class="text-xs font-mono font-bold text-gray-500 mb-1">ID: #APT-{{ str_pad($apartment->id, 4, '0', STR_PAD_LEFT) }}</div>
-                                    <h3 class="text-lg font-bold text-gray-900">{{ $apartment->name }}</h3>
-                                    <p class="text-sm text-gray-600 capitalize">📍 {{ $apartment->floor }} Floor</p>
-                                </div>
-                                
-                                <form action="{{ route('admin.apartments.toggle-status', $apartment->id) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to change the availability of this apartment?');">
-                                    @csrf
-                                    @method('PATCH')
-                                    <button type="submit" class="px-3 py-1 rounded-full text-xs font-bold transition hover:opacity-80 cursor-pointer {{ $apartment->status === 'available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800 shadow-sm border border-red-200' }}" title="Click to toggle availability">
-                                        {{ Str::upper($apartment->status) }} 
-                                        {!! $apartment->status === 'available' ? '✓' : '✗' !!}
-                                    </button>
-                                </form>
-                            </div>
+                    <p class="muted mt-1" style="font-size:13px;">
+                        <i class="fa-solid fa-location-dot"></i> {{ $apartment->location_line }}
+                    </p>
 
-                            <!-- Details -->
-                            <div class="grid grid-cols-2 gap-2 mb-4 text-sm text-gray-600">
-                                <div>🛏️ {{ $apartment->bedrooms }} Beds</div>
-                                <div>🚿 {{ $apartment->bathrooms }} Bath</div>
-                                <div>👥 {{ $apartment->max_guests }} Guests</div>
-                                <div class="font-bold text-blue-600">${{ number_format($apartment->price_per_night) }}/night</div>
-                            </div>
+                    <div class="mt-3 flex flex-wrap gap-1.5">
+                        <span class="badge badge-neutral">{{ $apartment->bedrooms }} bed</span>
+                        <span class="badge badge-neutral">Sleeps {{ $apartment->max_guests }}</span>
+                        <span class="badge badge-info">{{ $apartment->bookings_count }} bookings</span>
+                    </div>
 
-                            <!-- Booking Stats -->
-                            <div class="bg-gray-50 rounded p-3 mb-4 text-sm">
-                                <p class="text-gray-600">Active Bookings: <span class="font-bold">{{ $apartment->bookings()->where('status', 'confirmed')->count() }}</span></p>
-                                <p class="text-gray-600">Pending Bookings: <span class="font-bold">{{ $apartment->bookings()->where('status', 'pending')->count() }}</span></p>
-                            </div>
-
-                            <!-- Image Count -->
-                            <p class="text-sm text-gray-600 mb-4">📷 {{ $apartment->images->count() }} images</p>
-
-                            <!-- Actions -->
-                            <div class="space-y-2">
-                                <a 
-                                    href="{{ route('admin.apartments.edit', $apartment->id) }}"
-                                    class="w-full bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-2 rounded-lg font-semibold transition text-center block text-sm"
-                                >
-                                    Edit Apartment
-                                </a>
-                                <button 
-                                    type="button"
-                                    class="w-full bg-amber-200 hover:bg-amber-300 text-amber-900 px-4 py-2 rounded-lg font-semibold transition text-center text-sm"
-                                    onclick="alert('Block dates feature coming soon')"
-                                >
-                                    Block Dates
-                                </button>
-                                <form action="{{ route('admin.apartments.destroy', $apartment->id) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this apartment?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button 
-                                        type="submit"
-                                        class="w-full bg-red-100 hover:bg-red-200 text-red-800 px-4 py-2 rounded-lg font-semibold transition text-center text-sm"
-                                    >
-                                        Delete Apartment
-                                    </button>
-                                </form>
-                            </div>
+                    <div class="mt-4 flex items-center justify-between"
+                         style="border-top:1px solid var(--ink-200); padding-top:14px;">
+                        <div class="price font-bold" style="font-size:19px;">
+                            {{ \App\Support\Money::format($apartment->price_per_night) }}
+                            <span class="muted font-normal" style="font-size:12px;">/ night</span>
                         </div>
                     </div>
-                @endforeach
-            </div>
 
-            <!-- Pagination -->
-            @if($apartments->hasPages())
-                <div class="mt-8">
-                    {{ $apartments->links() }}
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <a href="{{ route('admin.apartments.edit', $apartment) }}" class="btn btn-secondary btn-sm">
+                            <i class="fa-solid fa-pen"></i> Edit
+                        </a>
+
+                        <form method="POST" action="{{ route('admin.apartments.toggle-status', $apartment) }}">
+                            @csrf @method('PATCH')
+                            <button class="btn btn-ghost btn-sm">
+                                {{ $apartment->status === 'available' ? 'Take off sale' : 'Put on sale' }}
+                            </button>
+                        </form>
+
+                        <a href="{{ route('apartments.show', $apartment) }}" class="btn btn-ghost btn-sm" target="_blank">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        </a>
+
+                        <form method="POST" action="{{ route('admin.apartments.destroy', $apartment) }}"
+                              onsubmit="return confirm('Delete {{ $apartment->name }}? This cannot be undone.')">
+                            @csrf @method('DELETE')
+                            <button class="btn btn-ghost btn-sm" style="color:var(--red-600);">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
                 </div>
-            @endif
-        @else
-            <div class="bg-gray-50 rounded-lg p-12 text-center">
-                <p class="text-gray-600 text-lg">No apartments found</p>
+            </article>
+        @empty
+            <div class="card card-pad text-center sm:col-span-2 lg:col-span-3" style="padding:56px 24px;">
+                <i class="fa-solid fa-building" style="font-size:40px; color:var(--ink-300);"></i>
+                <h2 style="font-size:20px; margin:16px 0 8px;">No properties yet</h2>
+                <p class="muted" style="font-size:14.5px;">Add your first property to start taking bookings.</p>
+                <a href="{{ route('admin.apartments.create') }}" class="btn btn-primary mt-5">
+                    <i class="fa-solid fa-plus"></i> Add property
+                </a>
             </div>
-        @endif
+        @endforelse
     </div>
+
+    @if ($apartments->hasPages())
+        <div class="mt-8">{{ $apartments->links() }}</div>
+    @endif
 </div>
 @endsection

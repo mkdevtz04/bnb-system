@@ -115,4 +115,30 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Where a guest's reply should land
+    |--------------------------------------------------------------------------
+    |
+    | Guest emails invite a reply, so one has to reach a person. By default that
+    | is whatever address the mail was sent from, which works while the two are
+    | the same inbox — but the moment MAIL_FROM_ADDRESS becomes a no-reply or a
+    | domain-verified sender nobody reads, every reply silently disappears.
+    | Setting this keeps the reply route separate from the sending identity.
+    |
+    | The host's own notifications do not use this: those reply to the guest who
+    | prompted them, which is set per-message.
+    |
+    */
+
+    // ?: rather than env()'s second argument, because that default only applies
+    // when the key is absent from .env entirely. A key that is present but blank
+    // — MAIL_REPLY_TO_ADDRESS= — yields an empty string, which sails past the
+    // default and reaches the mailer as an empty Reply-To, and the whole message
+    // is rejected as malformed.
+    'reply_to' => [
+        'address' => env('MAIL_REPLY_TO_ADDRESS') ?: env('MAIL_FROM_ADDRESS', 'hello@example.com'),
+        'name' => env('MAIL_REPLY_TO_NAME') ?: env('MAIL_FROM_NAME', 'Coastal Charms'),
+    ],
+
 ];

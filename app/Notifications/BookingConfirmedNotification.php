@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class BookingConfirmedNotification extends Notification
+class BookingConfirmedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -36,15 +36,15 @@ class BookingConfirmedNotification extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
+        // The subject carries the reference, not the database id. A padded
+        // sequential id told every guest how many bookings the business had ever
+        // taken, and invited guessing at the ones either side of it.
         return (new MailMessage)
-            ->subject('Booking Confirmed! #' . str_pad($this->booking->id, 6, '0', STR_PAD_LEFT))
-            ->greeting('Great news, ' . $this->booking->user->name . '!')
-            ->line('Your booking for ' . $this->booking->apartment->name . ' has been confirmed by the host.')
-            ->line('Check-in: ' . $this->booking->check_in->format('M d, Y'))
-            ->line('Check-out: ' . $this->booking->check_out->format('M d, Y'))
-            ->line('Total Price Paid: $' . number_format($this->booking->total_price))
-            ->action('View My Bookings', route('bookings.history'))
-            ->line('We look forward to hosting you. Safe travels!');
+            ->subject("Your stay is confirmed · {$this->booking->display_reference}")
+            // A guest told to "just reply to this email" must reach a person, even
+            // if the sending address later becomes a no-reply.
+            ->replyTo(config('mail.reply_to.address'), config('mail.reply_to.name'))
+            ->view('emails.booking-confirmed', ['booking' => $this->booking]);
     }
 
     /**
@@ -59,7 +59,7 @@ class BookingConfirmedNotification extends Notification
             'apartment_name' => $this->booking->apartment->name,
             'check_in' => $this->booking->check_in->format('Y-m-d'),
             'check_out' => $this->booking->check_out->format('Y-m-d'),
-            'message' => 'Your booking for ' . $this->booking->apartment->name . ' has been confirmed!'
+            'message' => 'Your booking for '.$this->booking->apartment->name.' has been confirmed!',
         ];
     }
 }

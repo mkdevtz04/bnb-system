@@ -1,70 +1,80 @@
 @extends('layouts.app')
 
+@section('title', 'Guests · Admin')
+
 @section('content')
-<div class="bg-gray-50 min-h-screen pb-12">
-    <div class="bg-[#003B95] text-white pt-8 pb-20 shadow-inner">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h1 class="text-3xl font-bold tracking-tight">User Management</h1>
-            <p class="mt-2 text-blue-100 text-lg font-medium">Manage user roles and permissions.</p>
+<div class="shell-wide" style="padding: 32px 16px 48px;">
+
+    <header class="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 style="font-size:28px;">Guests</h1>
+            <p class="muted" style="font-size:14.5px;">{{ $users->total() }} accounts</p>
         </div>
+        <a href="{{ route('admin.dashboard') }}" class="btn btn-ghost">
+            <i class="fa-solid fa-chevron-left"></i> Dashboard
+        </a>
+    </header>
+
+    <div class="card card-pad mb-5 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex gap-2">
+            <a href="{{ route('admin.users') }}" class="chip {{ request()->boolean('guests_only') ? '' : 'chip-active' }}">
+                Everyone
+            </a>
+            <a href="{{ route('admin.users', ['guests_only' => 1]) }}"
+               class="chip {{ request()->boolean('guests_only') ? 'chip-active' : '' }}">Has booked</a>
+        </div>
+
+        <form method="GET" class="flex items-center gap-2">
+            @if (request()->boolean('guests_only'))
+                <input type="hidden" name="guests_only" value="1">
+            @endif
+            <input type="search" name="q" class="input" style="width:220px;"
+                   placeholder="Name or email" value="{{ request('q') }}">
+            <button class="btn btn-secondary"><i class="fa-solid fa-magnifying-glass"></i></button>
+        </form>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10">
-        <div class="bg-white rounded-xl shadow-md overflow-hidden">
-            <div class="p-6 border-b border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
-                <h2 class="text-xl font-bold text-gray-900 italic">Registered Bookers</h2>
-                <form action="{{ route('admin.users') }}" method="GET" class="w-full md:w-96 relative">
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Search by name or email..." class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:border-[#003B95] focus:ring-2 focus:ring-[#003B95] transition">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                </form>
-            </div>
-
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-gray-50 border-b border-gray-200">
-                            <th class="px-6 py-4 text-xs font-black uppercase text-gray-500 tracking-widest">User</th>
-                            <th class="px-6 py-4 text-xs font-black uppercase text-gray-500 tracking-widest">Email</th>
-                            <th class="px-6 py-4 text-xs font-black uppercase text-gray-500 tracking-widest text-center">Total Bookings</th>
-                            <th class="px-6 py-4 text-xs font-black uppercase text-gray-500 tracking-widest text-right">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100">
-                        @forelse($users as $user)
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="px-6 py-4 whitespace-nowrap">
+    <div class="card overflow-hidden">
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                    <tr><th>Guest</th><th>Contact</th><th>Role</th><th>Bookings</th><th>Lifetime value</th><th>Joined</th></tr>
+                </thead>
+                <tbody>
+                    @forelse ($users as $user)
+                        <tr>
+                            <td>
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-[#003B95] font-black italic">
-                                        {{ strtoupper(substr($user->name, 0, 1)) }}
-                                    </div>
-                                    <span class="font-bold text-gray-900">{{ $user->name }}</span>
+                                    <span class="avatar">{{ $user->initials }}</span>
+                                    <strong>{{ $user->display_name }}</strong>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-sm text-gray-600 font-medium">
-                                {{ $user->email }}
+                            <td>
+                                <a href="mailto:{{ $user->email }}"
+                                   style="color:var(--brand-700); text-decoration:none;">{{ $user->email }}</a>
+                                @if ($user->phone)
+                                    <div class="muted" style="font-size:12.5px;">{{ $user->phone }}</div>
+                                @endif
                             </td>
-                            <td class="px-6 py-4 text-center">
-                                <span class="px-3 py-1 bg-blue-100 text-[#003B95] rounded-full text-xs font-black">{{ $user->bookings_count }}</span>
+                            <td>
+                                <span class="badge {{ $user->isAdmin() ? 'badge-info' : 'badge-neutral' }}">
+                                    {{ ucfirst($user->role) }}
+                                </span>
                             </td>
-                            <td class="px-6 py-4 text-right">
-                                <span class="text-xs text-gray-500 font-bold italic">Active Booker</span>
-                            </td>
+                            <td class="price">{{ $user->bookings_count }}</td>
+                            <td class="price">{{ \App\Support\Money::format($user->bookings_sum_total_price ?? 0) }}</td>
+                            <td class="muted" style="white-space:nowrap;">{{ $user->created_at->format('j M Y') }}</td>
                         </tr>
-                        @empty
-                        <tr>
-                            <td colspan="4" class="px-6 py-10 text-center text-gray-500 italic font-medium">
-                                No registered bookers found matching your search.
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="p-6 border-t border-gray-100 italic font-bold">
-                {{ $users->links() }}
-            </div>
+                    @empty
+                        <tr><td colspan="6" class="muted text-center" style="padding:44px;">No guests match.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
+
+    @if ($users->hasPages())
+        <div class="mt-6">{{ $users->links() }}</div>
+    @endif
 </div>
 @endsection

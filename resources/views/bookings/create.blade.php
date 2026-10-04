@@ -1,200 +1,156 @@
 @extends('layouts.app')
 
+@section('title', 'Confirm your booking · CoastalCharmz')
+
 @section('content')
-<div class="py-12">
-    <div class="max-w-4xl mx-auto px-4">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Booking Form -->
-            <div class="lg:col-span-2">
-                <div class="bg-white rounded-lg shadow-md p-8">
-                    <h1 class="text-3xl font-bold text-gray-900 mb-8">Complete Your Booking</h1>
+<div class="shell" style="padding: 24px 16px 48px; max-width: 980px;">
 
-                    <form action="{{ route('bookings.store') }}" method="POST" class="space-y-6">
-                        @csrf
+    {{-- Funnel progress, so the guest knows how many steps are left. --}}
+    <ol class="mb-6 flex items-center gap-2" style="font-size:13px;">
+        <li class="badge badge-success"><i class="fa-solid fa-check"></i> Your stay</li>
+        <li class="muted">—</li>
+        <li class="badge badge-info">2. Review &amp; confirm</li>
+        <li class="muted">—</li>
+        <li class="badge badge-neutral">3. Booked</li>
+    </ol>
 
-                        <input type="hidden" name="apartment_id" value="{{ $apartment->id }}">
+    <div class="grid gap-6 lg:grid-cols-[1fr_340px]">
 
-                        <!-- Check-in Date -->
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-2">Check-in Date</label>
-                            <input 
-                                type="text" 
-                                id="check_in" 
-                                name="check_in" 
-                                required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Select check-in date"
-                            >
-                            @error('check_in')
-                                <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
-                            @enderror
-                        </div>
+        <div class="stack">
+            <section class="card card-pad">
+                <h1 style="font-size:24px; margin-bottom:6px;">Review your booking</h1>
+                <p class="muted" style="font-size:14.5px;">
+                    Nothing is charged now. The host confirms your request, usually within a few hours.
+                </p>
+            </section>
 
-                        <!-- Check-out Date -->
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-2">Check-out Date</label>
-                            <input 
-                                type="text" 
-                                id="check_out" 
-                                name="check_out" 
-                                required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Select check-out date"
-                            >
-                            @error('check_out')
-                                <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        <!-- Guest Info -->
-                        <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                            <h3 class="font-bold text-gray-900 mb-4">Guest Information</h3>
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                                    <input 
-                                        type="text" 
-                                        value="{{ auth()->user()->name }}"
-                                        disabled
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
-                                    >
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                                    <input 
-                                        type="email" 
-                                        value="{{ auth()->user()->email }}"
-                                        disabled
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
-                                    >
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                                    <input 
-                                        type="tel" 
-                                        value="{{ auth()->user()->phone ?? 'Not provided' }}"
-                                        disabled
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
-                                    >
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Terms -->
-                        <div class="flex items-start gap-3">
-                            <input type="checkbox" id="terms" name="terms" required class="mt-1">
-                            <label for="terms" class="text-gray-700 text-sm">
-                                I agree to the <span class="font-bold">booking terms and conditions</span>. Your booking is pending admin confirmation.
-                            </label>
-                        </div>
-
-                        <!-- Submit Button -->
-                        <button 
-                            type="submit" 
-                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition"
-                        >
-                            Confirm Booking
-                        </button>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Booking Summary -->
-            <div class="lg:col-span-1">
-                <div class="bg-white rounded-lg shadow-lg p-6 sticky top-4">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Booking Summary</h2>
-
-                    <!-- Apartment Info -->
-                    <div class="mb-6 pb-6 border-b">
-                        <h3 class="font-bold text-gray-900 mb-2">{{ $apartment->name }}</h3>
-                        <div class="text-sm text-gray-600 space-y-1">
-                            <p>🛏️ {{ $apartment->bedrooms }} Bedrooms</p>
-                            <p>🚿 {{ $apartment->bathrooms }} Bathrooms</p>
-                            <p>👥 {{ $apartment->max_guests }} Guests</p>
-                            <p>📍 Floor: <span class="capitalize">{{ $apartment->floor }}</span></p>
-                        </div>
+            <section class="card card-pad">
+                <h2 style="font-size:18px; margin-bottom:16px;">Your stay</h2>
+                <dl class="grid gap-5 sm:grid-cols-3">
+                    <div>
+                        <dt class="field-label">Check-in</dt>
+                        <dd style="font-size:15px; font-weight:600;">{{ $checkIn->format('D, j M Y') }}</dd>
+                        <dd class="muted" style="font-size:13px;">
+                            From {{ \Carbon\Carbon::parse($apartment->check_in_from)->format('g:i A') }}
+                        </dd>
                     </div>
-
-                    <!-- Price Breakdown -->
-                    <div class="space-y-3 mb-6 pb-6 border-b">
-                        <div class="flex justify-between text-gray-700">
-                            <span>Price per night</span>
-                            <span>${{ number_format($apartment->price_per_night) }}</span>
-                        </div>
-                        <div class="flex justify-between text-gray-700">
-                            <span id="nights-label">Nights (0)</span>
-                            <span id="nights-price">$0</span>
-                        </div>
-                        <div class="flex justify-between text-gray-700">
-                            <span>Service Fee</span>
-                            <span id="service-fee">$0</span>
-                        </div>
-                        <div class="flex justify-between text-gray-700">
-                            <span>Tax (10%)</span>
-                            <span id="tax">$0</span>
-                        </div>
+                    <div>
+                        <dt class="field-label">Check-out</dt>
+                        <dd style="font-size:15px; font-weight:600;">{{ $checkOut->format('D, j M Y') }}</dd>
+                        <dd class="muted" style="font-size:13px;">
+                            Until {{ \Carbon\Carbon::parse($apartment->check_out_until)->format('g:i A') }}
+                        </dd>
                     </div>
-
-                    <!-- Total -->
-                    <div class="text-center mb-6">
-                        <p class="text-gray-600 text-sm mb-1">Total Price</p>
-                        <p class="text-4xl font-bold text-gray-900" id="total-price">$0</p>
+                    <div>
+                        <dt class="field-label">Guests</dt>
+                        <dd style="font-size:15px; font-weight:600;">
+                            {{ $quote->guests }} {{ Str::plural('guest', $quote->guests) }}
+                        </dd>
+                        <dd class="muted" style="font-size:13px;">Sleeps up to {{ $apartment->max_guests }}</dd>
                     </div>
+                </dl>
+            </section>
 
-                    <!-- Status -->
-                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-800">
-                        ⏳ Your booking will be <span class="font-bold">pending admin confirmation</span>
+            <section class="card card-pad">
+                <h2 style="font-size:18px; margin-bottom:16px;">Who's staying</h2>
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <span class="field-label">Name</span>
+                        <p style="font-size:15px;">{{ auth()->user()->display_name }}</p>
+                    </div>
+                    <div>
+                        <span class="field-label">Email</span>
+                        <p style="font-size:15px;">{{ auth()->user()->email }}</p>
+                    </div>
+                    <div>
+                        <span class="field-label">Phone</span>
+                        <p style="font-size:15px;">
+                            {{ auth()->user()->phone ?: '—' }}
+                            @unless (auth()->user()->phone)
+                                <a href="{{ route('profile.edit') }}" style="color:var(--brand-700); font-size:13px;">Add one</a>
+                            @endunless
+                        </p>
                     </div>
                 </div>
-            </div>
+            </section>
+
+            <form method="POST" action="{{ route('bookings.store') }}" class="card card-pad">
+                @csrf
+                <input type="hidden" name="apartment_id" value="{{ $apartment->id }}">
+                <input type="hidden" name="check_in" value="{{ $checkIn->toDateString() }}">
+                <input type="hidden" name="check_out" value="{{ $checkOut->toDateString() }}">
+                <input type="hidden" name="guests" value="{{ $quote->guests }}">
+
+                <label class="flex items-start gap-3" style="font-size:14px; line-height:1.55;">
+                    <input type="checkbox" name="terms" required class="mt-1" style="width:17px; height:17px;">
+                    <span>
+                        I agree to the house rules and understand this booking is a request that the
+                        host confirms. Free cancellation any time before check-in.
+                    </span>
+                </label>
+
+                <button type="submit" class="btn btn-primary btn-lg btn-block mt-5">
+                    <i class="fa-solid fa-lock"></i> Request to book
+                </button>
+            </form>
         </div>
+
+        {{-- Summary --}}
+        <aside>
+            <div class="card overflow-hidden" style="position: sticky; top: calc(var(--nav-h) + 16px);">
+                @if ($apartment->images->isNotEmpty())
+                    <div class="prop-media" style="height: 150px;">
+                        <img src="{{ Storage::url($apartment->images->first()->image_path) }}" alt="{{ $apartment->name }}">
+                    </div>
+                @endif
+
+                <div class="card-pad">
+                    <h3 style="font-size:17px; margin-bottom:4px;">{{ $apartment->name }}</h3>
+                    <p class="muted" style="font-size:13px;">
+                        <i class="fa-solid fa-location-dot"></i> {{ $apartment->location_line }}
+                    </p>
+
+                    <div class="mt-5" style="border-top:1px solid var(--ink-200); padding-top:16px;">
+                        <h4 class="field-label">Price breakdown</h4>
+
+                        {{-- Every figure below comes from PricingService, the same
+                             object that populates the booking row on submit. --}}
+                        <div class="mt-2 flex justify-between" style="font-size:14px;">
+                            <span>{{ \App\Support\Money::format($quote->nightlyRate, $quote->currency) }} &times; {{ $quote->nights }} {{ Str::plural('night', $quote->nights) }}</span>
+                            <span class="price">{{ \App\Support\Money::format($quote->subtotal, $quote->currency) }}</span>
+                        </div>
+
+                        @if ($quote->cleaningFee > 0)
+                            <div class="mt-2 flex justify-between" style="font-size:14px;">
+                                <span>Cleaning fee</span>
+                                <span class="price">{{ \App\Support\Money::format($quote->cleaningFee, $quote->currency) }}</span>
+                            </div>
+                        @endif
+
+                        <div class="mt-2 flex justify-between" style="font-size:14px;">
+                            <span>Service fee</span>
+                            <span class="price">{{ \App\Support\Money::format($quote->serviceFee, $quote->currency) }}</span>
+                        </div>
+
+                        <div class="mt-2 flex justify-between" style="font-size:14px;">
+                            <span>Taxes</span>
+                            <span class="price">{{ \App\Support\Money::format($quote->taxes, $quote->currency) }}</span>
+                        </div>
+
+                        <div class="mt-4 flex justify-between font-bold"
+                             style="font-size:18px; border-top:1px solid var(--ink-200); padding-top:14px;">
+                            <span>Total</span>
+                            <span class="price">{{ \App\Support\Money::format($quote->total, $quote->currency) }}</span>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info mt-4" style="font-size:13px;">
+                        <i class="fa-solid fa-circle-info mt-0.5"></i>
+                        <span>Pay the host directly at check-in.</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
     </div>
 </div>
-
-<!-- Flatpickr Integration -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script>
-    const pricePerNight = {{ $apartment->price_per_night }};
-
-    const checkInPicker = flatpickr("#check_in", {
-        minDate: "today",
-        dateFormat: "Y-m-d",
-        disableMobile: true,
-        onChange: updatePrice
-    });
-
-    const checkOutPicker = flatpickr("#check_out", {
-        minDate: "today",
-        dateFormat: "Y-m-d",
-        disableMobile: true,
-        onChange: updatePrice
-    });
-
-    function updatePrice() {
-        const checkIn = checkInPicker.selectedDates[0];
-        const checkOut = checkOutPicker.selectedDates[0];
-
-        if (!checkIn || !checkOut) {
-            document.getElementById('nights-label').innerText = 'Nights (0)';
-            document.getElementById('nights-price').innerText = '$0';
-            document.getElementById('service-fee').innerText = '$0';
-            document.getElementById('tax').innerText = '$0';
-            document.getElementById('total-price').innerText = '$0';
-            return;
-        }
-
-        const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
-        const subtotal = nights * pricePerNight;
-        const serviceFee = Math.round(subtotal * 0.05);
-        const tax = Math.round((subtotal + serviceFee) * 0.10);
-        const total = subtotal + serviceFee + tax;
-
-        document.getElementById('nights-label').innerText = `Nights (${nights})`;
-        document.getElementById('nights-price').innerText = `$${subtotal.toLocaleString()}`;
-        document.getElementById('service-fee').innerText = `$${serviceFee.toLocaleString()}`;
-        document.getElementById('tax').innerText = `$${tax.toLocaleString()}`;
-        document.getElementById('total-price').innerText = `$${total.toLocaleString()}`;
-    }
-</script>
 @endsection

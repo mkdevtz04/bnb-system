@@ -19,6 +19,7 @@
         "vite": "^7.0.7"
     },
     "dependencies": {
+        "firebase": "^12.19.0",
         "flatpickr": "^4.6.13"
     }
 }

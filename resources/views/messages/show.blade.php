@@ -1,67 +1,148 @@
 @extends('layouts.app')
 
+@section('title', 'Messages · ' . $booking->display_reference)
+
 @section('content')
-<div class="py-12 bg-gray-50 min-h-screen">
-    <div class="max-w-4xl mx-auto px-4">
-        {{-- Chat Header --}}
-        <div class="bg-white rounded-t-2xl shadow-sm border border-gray-200 p-6 flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                    <i class="fa-solid fa-comments text-xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold text-gray-900">Chat regarding {{ $booking->apartment->name }}</h1>
-                    <p class="text-xs text-gray-500 font-medium tracking-wide uppercase">Booking ID: #{{ str_pad($booking->id, 6, '0', STR_PAD_LEFT) }}</p>
+@php
+    $me = auth()->user();
+    $other = $me->isAdmin() ? $booking->user : null;
+@endphp
+
+<div class="shell" style="padding: 32px 16px 48px; max-width: 760px;">
+
+    <a href="{{ route('messages.index') }}" class="btn btn-ghost btn-sm mb-4">
+        <i class="fa-solid fa-chevron-left" style="font-size:11px;"></i> All messages
+    </a>
+
+    <div class="card overflow-hidden">
+        {{-- Header --}}
+        <div class="flex items-center justify-between gap-4 px-5 py-4"
+             style="border-bottom:1px solid var(--ink-200);">
+            <div class="flex items-center gap-3 min-w-0">
+                @if ($other)
+                    <span class="avatar shrink-0">{{ $other->initials }}</span>
+                @else
+                    <span class="avatar shrink-0" style="background:var(--brand-700);">
+                        <i class="fa-solid fa-house"></i>
+                    </span>
+                @endif
+                <div class="min-w-0">
+                    <h1 class="truncate" style="font-size:17px;">
+                        {{ $other?->display_name ?? 'The host' }}
+                    </h1>
+                    <p class="muted truncate" style="font-size:12.5px;">
+                        {{ $booking->apartment->name }}
+                        <span class="price">· {{ $booking->display_reference }}</span>
+                    </p>
                 </div>
             </div>
-            <a href="{{ auth()->user()->role === 'admin' ? route('admin.bookings') : route('bookings.history') }}" class="text-sm font-bold text-gray-400 hover:text-gray-600 transition">
-                <i class="fa-solid fa-xmark mr-1"></i> Close
+
+            <a href="{{ route('bookings.confirmation', $booking) }}" class="btn btn-ghost btn-sm shrink-0">
+                <span class="hidden sm:inline">Booking</span>
+                <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:11px;"></i>
             </a>
         </div>
 
-        {{-- Chat Messages Area --}}
-        <div class="bg-white border-x border-gray-200 h-[500px] overflow-y-auto p-6 space-y-4 flex flex-col" id="chat-messages">
-            @forelse($messages as $msg)
-                <div class="flex flex-col {{ $msg->sender_id === auth()->id() ? 'items-end' : 'items-start' }}">
-                    <div class="max-w-[70%] {{ $msg->sender_id === auth()->id() ? 'bg-blue-600 text-white rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl' : 'bg-gray-100 text-gray-800 rounded-tl-2xl rounded-tr-2xl rounded-br-2xl' }} p-4 shadow-sm">
-                        <p class="text-sm leading-relaxed">{{ $msg->message }}</p>
-                    </div>
-                    <span class="text-[10px] text-gray-400 mt-1 font-medium">{{ $msg->created_at->diffForHumans() }}</span>
+        {{-- Thread --}}
+        <div class="flex flex-col gap-3 p-5" id="thread"
+             style="height: 460px; overflow-y: auto; background: var(--canvas);">
+            @forelse ($messages as $message)
+                @php $mine = $message->sender_id === $me->id; @endphp
+                <div class="flex flex-col {{ $mine ? 'items-end' : 'items-start' }}">
+                    {{-- pre-wrap, because the composer allows Shift+Enter: without
+                         it every multi-line message would collapse to one line. --}}
+                    <div style="max-width: 78%; padding: 10px 14px; font-size: 14.5px; line-height: 1.55;
+                                border-radius: var(--r-lg); white-space: pre-wrap; overflow-wrap: anywhere;
+                                {{ $mine
+                                    ? 'background: var(--brand-700); color: #fff; border-bottom-right-radius: 4px;'
+                                    : 'background: var(--surface); border: 1px solid var(--ink-200); border-bottom-left-radius: 4px;' }}">{{ $message->message }}</div>
+                    <span class="muted mt-1" style="font-size:11.5px;">
+                        {{ $mine ? 'You' : $message->sender->display_name }} ·
+                        {{ $message->created_at->diffForHumans() }}
+                    </span>
                 </div>
             @empty
-                <div class="flex flex-col items-center justify-center h-full text-center">
-                    <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-                        <i class="fa-solid fa-comment-slash text-gray-200 text-3xl"></i>
-                    </div>
-                    <p class="text-gray-400 font-medium">No messages yet. Start the conversation!</p>
+                <div class="flex flex-1 flex-col items-center justify-center text-center">
+                    <i class="fa-regular fa-comments" style="font-size:36px; color:var(--ink-300);"></i>
+                    <p class="muted mt-3" style="font-size:14px;">No messages yet — say hello.</p>
                 </div>
             @endforelse
+            <span id="latest"></span>
         </div>
 
-        {{-- Message Input --}}
-        <div class="bg-gray-50 rounded-b-2xl border border-gray-200 p-4">
-            <form action="{{ route('messages.store', $booking) }}" method="POST" class="flex gap-4">
-                @csrf
-                <input 
-                    type="text" 
-                    name="message" 
-                    placeholder="Type your message here..." 
-                    class="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition shadow-sm"
-                    required
-                    autocomplete="off"
-                >
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold text-sm transition shadow-md flex items-center gap-2">
-                    <span>Send</span>
-                    <i class="fa-solid fa-paper-plane"></i>
+        {{-- Composer --}}
+        <form method="POST" action="{{ route('messages.store', $booking) }}"
+              class="p-4" style="border-top:1px solid var(--ink-200);"
+              x-data="composer()" x-ref="form">
+            @csrf
+
+            <div class="flex items-end gap-2">
+                <label class="sr-only" for="message">Message</label>
+
+                {{-- A textarea, not an input, so a message can have paragraphs.
+                     Enter sends and Shift+Enter adds a line — the convention
+                     people already expect from every other chat they use. --}}
+                <textarea id="message" name="message" required maxlength="2000" rows="1"
+                          class="textarea flex-1"
+                          style="resize:none; max-height:160px; overflow-y:auto; line-height:1.5;"
+                          placeholder="Write a message…"
+                          x-ref="input"
+                          x-on:input="grow()"
+                          x-on:keydown.enter="onEnter($event)">{{ old('message') }}</textarea>
+
+                <button type="submit" class="btn btn-primary shrink-0" style="height:44px;">
+                    <i class="fa-regular fa-paper-plane"></i>
+                    <span class="hidden sm:inline">Send</span>
                 </button>
-            </form>
-        </div>
+            </div>
+
+            <p class="muted mt-2" style="font-size:11.5px;">
+                <kbd style="font-family:inherit; font-weight:600;">Enter</kbd> to send ·
+                <kbd style="font-family:inherit; font-weight:600;">Shift + Enter</kbd> for a new line
+            </p>
+        </form>
     </div>
 </div>
 
+@push('scripts')
 <script>
-    // Scroll to bottom on load
-    const messageContainer = document.getElementById('chat-messages');
-    messageContainer.scrollTop = messageContainer.scrollHeight;
+    function composer() {
+        return {
+            /**
+             * Grow with the content instead of scrolling inside a one-line box.
+             * Height is reset first so the textarea can shrink again when text is
+             * deleted, not just grow.
+             */
+            grow() {
+                const el = this.$refs.input;
+                el.style.height = 'auto';
+                el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+            },
+
+            onEnter(event) {
+                // Shift+Enter is a newline, so let the browser handle it.
+                if (event.shiftKey) return;
+
+                // So is Enter while composing in an IME — intercepting it there
+                // would send half-finished text in languages that need one.
+                if (event.isComposing || event.keyCode === 229) return;
+
+                event.preventDefault();
+
+                if (this.$refs.input.value.trim() === '') return;
+
+                this.$refs.form.submit();
+            },
+
+            init() {
+                this.grow();
+            },
+        };
+    }
+
+    // Open on the newest message.
+    const thread = document.getElementById('thread');
+    if (thread) thread.scrollTop = thread.scrollHeight;
 </script>
+@endpush
 @endsection

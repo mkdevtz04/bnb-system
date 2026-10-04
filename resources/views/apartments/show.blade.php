@@ -1,346 +1,319 @@
-<x-app-layout>
-    @push('styles')
-    <style>
+@extends('layouts.app')
 
-        .show-container {
-            padding: 40px 20px;
-            background: var(--bg);
-            min-height: calc(100vh - 64px);
-        }
+@section('title', $apartment->name . ' · CoastalCharmz')
+@section('meta_description', Str::limit(strip_tags($apartment->description), 150))
 
-        .show-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 32px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+@section('content')
+@php
+    $images = $apartment->images;
+    $amenityIcons = [
+        'wifi' => 'fa-wifi', 'kitchen' => 'fa-kitchen-set', 'air_conditioning' => 'fa-snowflake',
+        'parking' => 'fa-square-parking', 'workspace' => 'fa-laptop', 'washer' => 'fa-soap',
+        'tv' => 'fa-tv', 'balcony' => 'fa-umbrella-beach',
+    ];
+@endphp
 
-        .show-header h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: 36px;
-            font-weight: 700;
-            margin-bottom: 12px;
-            color: var(--text);
-        }
+<div class="shell" style="padding: 24px 16px 48px;">
 
-        .show-header .location {
-            color: var(--muted);
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 24px;
-        }
+    <nav aria-label="Breadcrumb" class="muted mb-4" style="font-size:13px;">
+        <a href="{{ route('apartments.search') }}" style="color:var(--brand-700); text-decoration:none;">Search</a>
+        <span class="mx-1.5">/</span>
+        <span>{{ $apartment->name }}</span>
+    </nav>
 
-        .main-gallery {
-            background: #fff;
-            padding: 12px;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
-            margin-bottom: 32px;
-        }
+    <header class="mb-5 flex flex-wrap items-start justify-between gap-4">
+        <div>
+            <h1 style="font-size:30px; line-height:1.2;">{{ $apartment->name }}</h1>
+            <p class="muted mt-1.5 flex items-center gap-1.5" style="font-size:14px;">
+                <i class="fa-solid fa-location-dot"></i>
+                {{ $apartment->address ? $apartment->address . ', ' : '' }}{{ $apartment->location_line }}
+            </p>
+        </div>
+        <x-score-badge :score="$apartment->review_score" :count="$apartment->review_count"
+                       :label="$apartment->review_label" size="lg" class="flex-row-reverse" />
+    </header>
 
-        .main-image {
-            width: 100%;
-            height: 480px;
-            border-radius: 12px;
-            object-fit: cover;
-            background: var(--blue-light);
-            cursor: zoom-in;
-        }
+    {{-- Gallery --}}
+    @if ($images->isNotEmpty())
+        <div class="mb-8 grid gap-2" style="grid-template-columns: repeat(4, 1fr); border-radius: var(--r-lg); overflow: hidden;">
+            <a href="{{ Storage::url($images[0]->image_path) }}" target="_blank" rel="noopener"
+               class="prop-media" style="grid-column: span 2; grid-row: span 2; aspect-ratio: 1/1;">
+                <img src="{{ Storage::url($images[0]->image_path) }}" alt="{{ $apartment->name }}">
+            </a>
+            @foreach ($images->slice(1, 4) as $image)
+                <a href="{{ Storage::url($image->image_path) }}" target="_blank" rel="noopener"
+                   class="prop-media" style="aspect-ratio: 1/1;">
+                    <img src="{{ Storage::url($image->image_path) }}" alt="{{ $apartment->name }}" loading="lazy">
+                </a>
+            @endforeach
+        </div>
+    @else
+        <div class="prop-media card mb-8" style="height: 320px;">
+            <span class="prop-empty"><i class="fa-solid fa-building"></i></span>
+        </div>
+    @endif
 
-        .thumb-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-            margin-top: 12px;
-        }
+    <div class="grid gap-8 lg:grid-cols-[1fr_360px]">
 
-        .thumb {
-            height: 100px;
-            width: 100%;
-            border-radius: 8px;
-            object-fit: cover;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: all 0.2s;
-        }
+        {{-- Details --}}
+        <div class="stack">
+            <section class="card card-pad">
+                <h2 style="font-size:21px; margin-bottom:12px;">About this place</h2>
+                <p class="muted" style="font-size:15px; line-height:1.7; white-space:pre-line;">{{ $apartment->description }}</p>
 
-        .thumb:hover, .thumb.active { border-color: var(--blue); transform: scale(1.02); }
-
-        .details-card {
-            background: #fff;
-            padding: 32px;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
-            margin-bottom: 32px;
-        }
-
-        .details-card h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 24px;
-            margin-bottom: 20px;
-            color: var(--text);
-            border-bottom: 2px solid var(--blue-light);
-            display: inline-block;
-            padding-bottom: 4px;
-        }
-
-        .amenity-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin-top: 24px;
-        }
-
-        .amenity-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 16px;
-            background: var(--bg);
-            border-radius: 12px;
-            color: var(--text);
-            font-size: 15px;
-            font-weight: 500;
-            border: 1px solid transparent;
-            transition: 0.2s;
-        }
-        .amenity-item:hover { border-color: var(--blue-light); background: #fff; transform: translateY(-2px); }
-
-        .amenity-item i {
-            color: var(--blue);
-            font-size: 18px;
-        }
-
-        .booking-sidebar {
-            background: #fff;
-            padding: 32px;
-            border-radius: var(--radius);
-            box-shadow: 0 12px 48px rgba(0,0,0,0.08);
-            border: 1px solid var(--border);
-            position: sticky;
-            top: 100px;
-        }
-
-        .price-tag { margin-bottom: 24px; }
-        .price-tag .amount { font-size: 32px; font-weight: 800; color: var(--blue); }
-        .price-tag .unit { color: var(--muted); font-size: 14px; }
-
-        .form-label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; margin-top: 16px; }
-        .booking-input { width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; outline: none; transition: 0.2s; background: var(--bg); font-weight: 500; }
-        .booking-input:focus { border-color: var(--blue); background: #fff; box-shadow: 0 0 0 4px var(--blue-light); }
-
-        .price-summary {
-            background: var(--bg);
-            padding: 20px;
-            border-radius: 12px;
-            margin: 20px 0;
-            display: none;
-        }
-        .summary-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; color: var(--muted); }
-        .summary-total { display: flex; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); font-weight: 700; font-size: 16px; color: var(--text); }
-
-        .btn-confirm {
-            width: 100%;
-            background: var(--blue);
-            color: #fff;
-            padding: 16px;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s;
-            margin-top: 24px;
-            text-decoration: none;
-        }
-
-        .btn-confirm:disabled { background: #cbd5e0; cursor: not-allowed; transform: none; box-shadow: none; }
-        .btn-confirm:hover:not(:disabled) { background: var(--blue-dark); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(26,110,255,0.2); }
-
-        /* Flatpickr Custom */
-        .flatpickr-calendar { box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important; border: none !important; }
-        .flatpickr-day.selected { background: var(--blue) !important; border-color: var(--blue) !important; }
-        
-        @media (max-width: 1024px) {
-            .show-grid { gap: 24px; padding: 0 16px; }
-            .main-image { height: 380px; }
-        }
-
-        @media (max-width: 900px) {
-            .show-grid { grid-template-columns: 1fr; }
-            .booking-sidebar { position: static; margin-top: 32px; box-shadow: var(--shadow); }
-        }
-
-        @media (max-width: 640px) {
-            .show-header h1 { font-size: 28px; }
-            .main-image { height: 300px; }
-            .amenity-grid { grid-template-columns: 1fr; gap: 12px; }
-            .thumb-grid { grid-template-columns: repeat(3, 1fr); }
-            .thumb:nth-child(4) { display: none; }
-        }
-    </style>
-    @endpush
-
-    <div class="show-container">
-        <div class="show-grid">
-            
-            {{-- Left Column --}}
-            <div class="main-content">
-                <div class="show-header">
-                    @auth
-                        <a href="{{ Auth::user()->role == 'admin' ? route('admin.dashboard') : route('dashboard') }}" style="color:var(--blue); text-decoration:none; font-size:14px; font-weight:600; margin-bottom:16px; display:inline-block;">
-                            <i class="fa-solid fa-chevron-left"></i> Back to Apartments
-                        </a>
-                    @endauth
-                    <h1>{{ $apartment->name }}</h1>
-                    <div class="location">
-                        <i class="fa-solid fa-location-dot"></i>
-                        {{ $apartment->floor }} Floor • Prime Residential Area • City Center
+                <div class="mt-6 grid gap-3 sm:grid-cols-2" style="border-top:1px solid var(--ink-200); padding-top:20px;">
+                    <div class="flex items-center gap-2.5" style="font-size:14.5px;">
+                        <i class="fa-solid fa-bed muted w-5"></i> {{ $apartment->bedrooms }} {{ Str::plural('bedroom', $apartment->bedrooms) }}
+                    </div>
+                    <div class="flex items-center gap-2.5" style="font-size:14.5px;">
+                        <i class="fa-solid fa-bath muted w-5"></i> {{ $apartment->bathrooms }} {{ Str::plural('bathroom', $apartment->bathrooms) }}
+                    </div>
+                    <div class="flex items-center gap-2.5" style="font-size:14.5px;">
+                        <i class="fa-solid fa-user-group muted w-5"></i> Sleeps {{ $apartment->max_guests }}
+                    </div>
+                    <div class="flex items-center gap-2.5" style="font-size:14.5px;">
+                        <i class="fa-solid fa-stairs muted w-5"></i> <span class="capitalize">{{ $apartment->floor }}</span> floor
                     </div>
                 </div>
+            </section>
 
-                <div class="main-gallery">
-                    @if($apartment->images->count() > 0)
-                        <img src="{{ \Storage::url($apartment->images->first()->image_path) }}" class="main-image" id="mainImage">
-                        @if($apartment->images->count() > 1)
-                            <div class="thumb-grid">
-                                @foreach($apartment->images as $i => $image)
-                                    <img src="{{ \Storage::url($image->image_path) }}" class="thumb {{ $i==0 ? 'active' : '' }}" onclick="changeImage(this)">
-                                @endforeach
+            @if (filled($apartment->amenities))
+                <section class="card card-pad">
+                    <h2 style="font-size:21px; margin-bottom:16px;">Amenities</h2>
+                    {{-- Driven by the property's own data. The old page hard-coded
+                         the same eight amenities onto every listing. --}}
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        @foreach ($apartment->amenities as $amenity)
+                            <div class="flex items-center gap-2.5" style="font-size:14.5px;">
+                                <i class="fa-solid {{ $amenityIcons[$amenity] ?? 'fa-circle-check' }}"
+                                   style="color:var(--green-600); width:20px;"></i>
+                                {{ Str::of($amenity)->replace('_', ' ')->title() }}
                             </div>
-                        @endif
-                    @else
-                        <div class="main-image" style="display:flex; align-items:center; justify-content:center; background:#f0f4f8; border-radius:12px;">
-                            <i class="fa-solid fa-building fa-4x" style="color:#d1d5db;"></i>
-                        </div>
+                        @endforeach
+                    </div>
+                </section>
+            @endif
+
+            <section class="card card-pad">
+                <h2 style="font-size:21px; margin-bottom:16px;">House rules</h2>
+                <dl class="grid gap-4 sm:grid-cols-3">
+                    <div>
+                        <dt class="field-label">Check-in</dt>
+                        <dd style="font-size:15px;">From {{ \Carbon\Carbon::parse($apartment->check_in_from)->format('g:i A') }}</dd>
+                    </div>
+                    <div>
+                        <dt class="field-label">Check-out</dt>
+                        <dd style="font-size:15px;">Until {{ \Carbon\Carbon::parse($apartment->check_out_until)->format('g:i A') }}</dd>
+                    </div>
+                    <div>
+                        <dt class="field-label">Minimum stay</dt>
+                        <dd style="font-size:15px;">{{ $apartment->min_nights }} {{ Str::plural('night', $apartment->min_nights) }}</dd>
+                    </div>
+                </dl>
+            </section>
+
+            {{-- Reviews --}}
+            <section class="card card-pad" id="reviews">
+                <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+                    <h2 style="font-size:21px;">Guest reviews</h2>
+                    @if ($apartment->review_count > 0)
+                        <a href="{{ route('apartments.reviews', $apartment) }}" class="btn btn-secondary btn-sm">
+                            Read all {{ $apartment->review_count }}
+                        </a>
                     @endif
                 </div>
 
-                <div class="details-card">
-                    <h2>About this place</h2>
-                    <p style="color:var(--muted); line-height:1.7; font-size:16px;">{{ $apartment->description }}</p>
-
-                    <h2 style="margin-top:48px;">Amenities & Features</h2>
-                    <div class="amenity-grid">
-                        <div class="amenity-item"><i class="fa-solid fa-bed"></i> <strong>{{ $apartment->bedrooms }}</strong> Bedrooms</div>
-                        <div class="amenity-item"><i class="fa-solid fa-bath"></i> <strong>{{ $apartment->bathrooms }}</strong> Bathrooms</div>
-                        <div class="amenity-item"><i class="fa-solid fa-users"></i> Up to <strong>{{ $apartment->max_guests }}</strong> Guests</div>
-                        <div class="amenity-item"><i class="fa-solid fa-wifi"></i> Free High-Speed WiFi</div>
-                        <div class="amenity-item"><i class="fa-solid fa-snowflake"></i> Air Conditioning</div>
-                        <div class="amenity-item"><i class="fa-solid fa-laptop-code"></i> Workspace/Office Space</div>
-                        <div class="amenity-item"><i class="fa-solid fa-kitchen-set"></i> Full Gourmet Kitchen</div>
-                        <div class="amenity-item"><i class="fa-solid fa-shield-halved"></i> 24/7 Security Access</div>
+                @if ($categoryScores)
+                    <div class="mb-6 grid gap-x-8 gap-y-3 sm:grid-cols-2">
+                        @foreach ($categoryScores as $category)
+                            <div>
+                                <div class="mb-1 flex items-center justify-between" style="font-size:13.5px;">
+                                    <span>{{ $category['label'] }}</span>
+                                    <strong class="price">{{ number_format($category['score'], 1) }}</strong>
+                                </div>
+                                <div class="score-bar"><span style="width: {{ $category['score'] * 10 }}%;"></span></div>
+                            </div>
+                        @endforeach
                     </div>
+                @endif
+
+                <div class="divide-y-soft">
+                    @forelse ($apartment->reviews as $review)
+                        <article class="py-4">
+                            <div class="mb-2 flex items-center gap-3">
+                                <span class="avatar">{{ $review->user->initials }}</span>
+                                <div class="flex-1">
+                                    <div class="font-semibold" style="font-size:14px;">{{ $review->user->display_name }}</div>
+                                    <div class="muted" style="font-size:12.5px;">{{ $review->created_at->format('M Y') }}</div>
+                                </div>
+                                <span class="score score-sm">{{ number_format($review->overall, 1) }}</span>
+                            </div>
+                            @if ($review->title)
+                                <h3 style="font-size:15px; font-family:var(--font-body); margin-bottom:6px;">{{ $review->title }}</h3>
+                            @endif
+                            @if ($review->liked)
+                                <p style="font-size:14px; line-height:1.6;">
+                                    <i class="fa-solid fa-thumbs-up" style="color:var(--green-600);"></i> {{ $review->liked }}
+                                </p>
+                            @endif
+                            @if ($review->disliked)
+                                <p class="muted mt-1.5" style="font-size:14px; line-height:1.6;">
+                                    <i class="fa-solid fa-thumbs-down"></i> {{ $review->disliked }}
+                                </p>
+                            @endif
+                        </article>
+                    @empty
+                        <p class="muted py-6 text-center" style="font-size:14.5px;">
+                            No reviews yet — be the first to stay and tell us how it went.
+                        </p>
+                    @endforelse
                 </div>
-            </div>
+            </section>
+        </div>
 
-            {{-- Right Column (Booking) --}}
-            <aside>
-                <div class="booking-sidebar">
-                    <div class="price-tag">
-                        <span class="amount">${{ number_format($apartment->price_per_night) }}</span>
-                        <span class="unit">/ night</span>
+        {{-- Booking sidebar --}}
+        <aside>
+            <div class="card card-pad" style="position: sticky; top: calc(var(--nav-h) + 16px);"
+                 x-data="stayPicker(@js([
+                     'quoteUrl' => route('apartments.quote', $apartment),
+                     'maxGuests' => $apartment->max_guests,
+                     'initial' => $quote?->toArray(),
+                 ]))">
+
+                <div class="mb-4 flex items-baseline gap-1.5">
+                    <span class="price font-bold" style="font-size:27px;">
+                        {{ \App\Support\Money::format($apartment->price_per_night, config('booking.currency')) }}
+                    </span>
+                    <span class="muted" style="font-size:14px;">per night</span>
+                </div>
+
+                @if ($apartment->status !== 'available')
+                    <div class="alert alert-warning">
+                        <i class="fa-solid fa-triangle-exclamation mt-0.5"></i>
+                        <span>This property is temporarily unavailable.</span>
                     </div>
+                @else
+                    <form method="GET" action="{{ route('bookings.create', $apartment) }}" class="stack">
+                        <div class="field">
+                            <label class="field-label" for="stay">Your stay</label>
+                            <input type="text" id="stay" class="input" placeholder="Select your dates" readonly
+                                   data-datepicker="range"
+                                   data-disabled-dates="{{ json_encode($unavailableDates) }}">
+                            <input type="hidden" name="check_in" value="{{ $checkIn?->toDateString() }}">
+                            <input type="hidden" name="check_out" value="{{ $checkOut?->toDateString() }}">
+                        </div>
 
-                    <form action="{{ route('bookings.store') }}" method="POST" id="bookingForm">
-                        @csrf
-                        <input type="hidden" name="apartment_id" value="{{ $apartment->id }}">
-                        
-                        <label class="form-label">Pick Availability</label>
-                        <input type="text" id="date_range" class="booking-input" placeholder="Select dates..." readonly>
-                        <input type="hidden" name="check_in" id="check_in">
-                        <input type="hidden" name="check_out" id="check_out">
+                        <div class="field">
+                            <label class="field-label" for="guests">Guests</label>
+                            <select name="guests" id="guests" class="select" x-model="guests" @change="refresh">
+                                @for ($i = 1; $i <= $apartment->max_guests; $i++)
+                                    <option value="{{ $i }}">{{ $i }} {{ Str::plural('guest', $i) }}</option>
+                                @endfor
+                            </select>
+                        </div>
 
-                        <label class="form-label">Number of Guests</label>
-                        <select name="guests" class="booking-input">
-                            @for($i = 1; $i <= $apartment->max_guests; $i++)
-                                <option value="{{ $i }}">{{ $i }} {{ $i > 1 ? 'Guests' : 'Guest' }}</option>
-                            @endfor
-                        </select>
-
-                        <div class="price-summary" id="priceSummary">
-                            <div class="summary-row">
-                                <span id="summary-nights-label">$0 x 0 nights</span>
-                                <span id="summary-stay-total">$0</span>
+                        {{-- Price breakdown, fetched from the server. The client no
+                             longer computes any figure the guest is shown. --}}
+                        <div x-show="quote" x-cloak class="panel" style="padding:14px;">
+                            <div class="flex justify-between" style="font-size:14px;">
+                                <span x-text="`${money(quote.nightly_rate)} x ${quote.nights} nights`"></span>
+                                <span class="price" x-text="money(quote.subtotal)"></span>
                             </div>
-                            <div class="summary-row">
+                            <template x-if="quote && quote.cleaning_fee > 0">
+                                <div class="mt-2 flex justify-between" style="font-size:14px;">
+                                    <span>Cleaning fee</span>
+                                    <span class="price" x-text="money(quote.cleaning_fee)"></span>
+                                </div>
+                            </template>
+                            <div class="mt-2 flex justify-between" style="font-size:14px;">
                                 <span>Service fee</span>
-                                <span>$0</span>
+                                <span class="price" x-text="money(quote.service_fee)"></span>
                             </div>
-                            <div class="summary-total">
+                            <div class="mt-2 flex justify-between" style="font-size:14px;">
+                                <span>Taxes</span>
+                                <span class="price" x-text="money(quote.taxes)"></span>
+                            </div>
+                            <div class="mt-3 flex justify-between font-bold"
+                                 style="font-size:16.5px; border-top:1px solid var(--ink-200); padding-top:12px;">
                                 <span>Total</span>
-                                <span id="summary-total">$0</span>
+                                <span class="price" x-text="money(quote.total)"></span>
                             </div>
                         </div>
 
-                        <button type="submit" class="btn-confirm" id="bookBtn" disabled>
-                            <i class="fa-solid fa-bolt"></i>
-                            Check Availability
+                        <div x-show="unavailable" x-cloak class="alert alert-error">
+                            <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
+                            <span>Those dates are not available. Try another stay.</span>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg btn-block"
+                                x-bind:disabled="!quote || unavailable">
+                            <span x-text="quote ? 'Reserve' : 'Select dates'"></span>
                         </button>
                     </form>
 
-                    <div style="margin-top:24px; padding-top:24px; border-top:1px solid var(--border); font-size:13px; color:var(--muted); text-align:center;">
-                        <i class="fa-solid fa-circle-info"></i> Your dates are safe. You won't be charged yet.
-                    </div>
-                </div>
-            </aside>
-
-        </div>
+                    <p class="muted mt-3 text-center" style="font-size:12.5px;">
+                        <i class="fa-solid fa-lock"></i> You won't be charged yet.
+                    </p>
+                @endif
+            </div>
+        </aside>
     </div>
+</div>
 
-    <script>
-        function changeImage(el) {
-            document.getElementById('mainImage').src = el.src;
-            document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
-            el.classList.add('active');
-        }
+@push('scripts')
+<script>
+    function stayPicker(config) {
+        return {
+            quote: config.initial || null,
+            unavailable: false,
+            guests: 1,
+            loading: false,
 
-        const pricePerNight = {{ $apartment->price_per_night }};
-        const unavailableDates = {!! json_encode($unavailableDates) !!};
+            init() {
+                // The range picker announces a complete stay; ask the server what
+                // it costs rather than working it out here.
+                this.$root.addEventListener('stay:selected', (e) => this.refresh(e.detail));
+                this.$root.addEventListener('stay:cleared', () => {
+                    this.quote = null;
+                    this.unavailable = false;
+                });
+            },
 
-        flatpickr("#date_range", {
-            mode: "range",
-            minDate: "today",
-            dateFormat: "Y-m-d",
-            disable: unavailableDates,
-            onClose: function(selectedDates, dateStr, instance) {
-                if (selectedDates.length === 2) {
-                    const start = selectedDates[0];
-                    const end = selectedDates[1];
-                    const diffTime = Math.abs(end - start);
-                    const diffNights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            async refresh(detail) {
+                const form = this.$root.querySelector('form');
+                const checkIn = detail?.checkIn ?? form.querySelector('[name="check_in"]').value;
+                const checkOut = detail?.checkOut ?? form.querySelector('[name="check_out"]').value;
 
-                    if (diffNights > 0) {
-                        // Update hidden fields
-                        document.getElementById('check_in').value = instance.formatDate(start, "Y-m-d");
-                        document.getElementById('check_out').value = instance.formatDate(end, "Y-m-d");
+                if (!checkIn || !checkOut) return;
 
-                        // Show summary
-                        const stayTotal = pricePerNight * diffNights;
-                        document.getElementById('priceSummary').style.display = 'block';
-                        document.getElementById('summary-nights-label').innerText = `$${pricePerNight} x ${diffNights} nights`;
-                        document.getElementById('summary-stay-total').innerText = `$${stayTotal}`;
-                        document.getElementById('summary-total').innerText = `$${stayTotal}`;
-                        
-                        // Enable button
-                        document.getElementById('bookBtn').disabled = false;
-                        document.getElementById('bookBtn').innerHTML = '<i class="fa-solid fa-bolt"></i> Reserve Now';
-                    }
-                } else {
-                    document.getElementById('priceSummary').style.display = 'none';
-                    document.getElementById('bookBtn').disabled = true;
-                    document.getElementById('bookBtn').innerHTML = '<i class="fa-solid fa-bolt"></i> Check Availability';
+                this.loading = true;
+                try {
+                    const params = new URLSearchParams({ check_in: checkIn, check_out: checkOut, guests: this.guests });
+                    const res = await fetch(`${config.quoteUrl}?${params}`, {
+                        headers: { 'Accept': 'application/json' },
+                    });
+                    if (!res.ok) throw new Error('quote failed');
+
+                    const data = await res.json();
+                    this.quote = data.quote;
+                    this.unavailable = !data.available;
+                } catch {
+                    this.quote = null;
+                    this.unavailable = false;
+                } finally {
+                    this.loading = false;
                 }
-            }
-        });
-    </script>
-</x-app-layout>
+            },
+
+            money(value) {
+                return new Intl.NumberFormat(undefined, {
+                    style: 'currency',
+                    currency: @js(config('booking.currency')),
+                    maximumFractionDigits: 2,
+                }).format(value ?? 0);
+            },
+        };
+    }
+</script>
+@endpush
+@endsection

@@ -14,10 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => \App\Http\Middleware\IsAdmin::class,
         ]);
-        
-        $middleware->validateCsrfTokens(except: [
-            'auth/otp/*',
-        ]);
+
+        // The OTP routes used to be CSRF-exempt, which was never needed: the sign-in
+        // modal already sends X-CSRF-TOKEN with both requests.
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
