@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ApartmentController;
+use App\Http\Controllers\ApartmentRateController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\IcalController;
 use App\Http\Controllers\InquiryController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NotificationController;
@@ -38,6 +40,13 @@ Route::post('/contact', [InquiryController::class, 'store'])
 Route::get('/apartments/{apartment}', [ApartmentController::class, 'show'])->name('apartments.show');
 Route::get('/apartments/{apartment}/quote', [ApartmentController::class, 'quote'])->name('apartments.quote');
 Route::get('/apartments/{apartment}/reviews', [ReviewController::class, 'index'])->name('apartments.reviews');
+
+// Subscribed to by other platforms (Google Calendar, Airbnb, VRBO), never by
+// a browser session, so it sits outside auth entirely and is protected only
+// by the apartment's own ical_token.
+Route::get('/calendar/{apartment}/{token}.ics', [IcalController::class, 'export'])
+    ->where('token', '[A-Za-z0-9]+')
+    ->name('apartments.ical.export');
 
 /*
 |--------------------------------------------------------------------------
@@ -97,6 +106,16 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/apartments/{apartment}/block-dates', [AdminController::class, 'blockDates'])->name('apartments.block-dates');
     Route::delete('/blocked-dates/{blockedDate}', [AdminController::class, 'unblockDate'])->name('apartments.unblock-date');
     Route::delete('/apartments/images/{image}', [AdminController::class, 'destroyImage'])->name('apartments.images.destroy');
+
+    // Connected calendars (iCal sync with Airbnb, VRBO, ...)
+    Route::post('/apartments/{apartment}/ical-feeds', [AdminController::class, 'storeIcalFeed'])->name('apartments.ical-feeds.store');
+    Route::post('/ical-feeds/{feed}/sync', [AdminController::class, 'syncIcalFeed'])->name('apartments.ical-feeds.sync');
+    Route::delete('/ical-feeds/{feed}', [AdminController::class, 'destroyIcalFeed'])->name('apartments.ical-feeds.destroy');
+
+    // Per-date rate overrides
+    Route::get('/apartments/{apartment}/rates', [ApartmentRateController::class, 'index'])->name('apartments.rates.index');
+    Route::post('/apartments/{apartment}/rates', [ApartmentRateController::class, 'store'])->name('apartments.rates.store');
+    Route::delete('/apartments/{apartment}/rates', [ApartmentRateController::class, 'destroy'])->name('apartments.rates.destroy');
 
     Route::get('/users', [AdminController::class, 'users'])->name('users');
 

@@ -40,13 +40,26 @@ class Apartment extends Model
         ];
     }
 
-    protected static function booted(): void
+    /**
+     * Not a saving() event, deliberately — the same reason Review::save() gives:
+     * model events can be muted (this project's own DatabaseSeeder uses
+     * WithoutModelEvents, which is exactly how three seeded apartments first
+     * ended up with a null ical_token), and both the slug and the export token
+     * are things every apartment must have regardless of how the row was
+     * written. Overriding save() runs unconditionally, event or no event.
+     */
+    public function save(array $options = []): bool
     {
-        static::saving(function (Apartment $apartment) {
-            if (blank($apartment->slug)) {
-                $apartment->slug = static::uniqueSlug($apartment->name, $apartment->getKey());
-            }
-        });
+        if (blank($this->slug)) {
+            $this->slug = static::uniqueSlug($this->name, $this->getKey());
+        }
+
+        // Needed before the property has an .ics export URL to give out.
+        if (blank($this->ical_token)) {
+            $this->ical_token = Str::random(40);
+        }
+
+        return parent::save($options);
     }
 
     public static function uniqueSlug(string $name, ?int $ignoreId = null): string
@@ -81,6 +94,16 @@ class Apartment extends Model
     public function reviews()
     {
         return $this->hasMany(Review::class);
+    }
+
+    public function icalFeeds()
+    {
+        return $this->hasMany(ApartmentIcalFeed::class);
+    }
+
+    public function rates()
+    {
+        return $this->hasMany(ApartmentRate::class);
     }
 
     /**

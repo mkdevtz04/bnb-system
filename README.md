@@ -147,8 +147,50 @@ Two things take a night off sale:
 
 1. **A booking** with status `pending` or `confirmed`. Cancelling releases the
    nights immediately, because availability reads the booking's own status.
-2. **A `blocked_dates` row**, which is a manual closure by the host and nothing
-   else. It is deliberately *not* a mirror of confirmed bookings.
+2. **A `blocked_dates` row**, which is a manual closure by the host, **or** a
+   night mirrored in from a connected external calendar (see below). Either
+   way, every row here closes a real night.
+
+## Calendar sync (iCal)
+
+Each property can be kept in step with other platforms in both directions, so
+the same night is never offered twice.
+
+**Export.** Every apartment has its own `.ics` feed:
+
+```
+GET /calendar/{apartment}/{ical_token}.ics
+```
+
+Paste that URL into Airbnb's or VRBO's "import calendar" field (or any
+calendar app's "subscribe by URL") so they stop offering nights already taken
+here. It is public and unauthenticated by necessity — the platforms polling it
+cannot log in — so it is protected only by `ical_token`, a random 40-character
+value generated per apartment, and `App\Services\Ical\IcalExportService`
+never includes a guest's name, email or booking reference in it, only
+anonymous busy blocks. The link is shown on each property's **Edit** page,
+under *Connected calendars*.
+
+**Import.** The reverse direction: point a property at someone else's export
+URL (an Airbnb listing, a VRBO feed) from the same *Connected calendars*
+section, and `php artisan bookings:sync-ical-feeds` — scheduled hourly in
+`routes/console.php` — mirrors its busy dates into `blocked_dates`, tagged
+`source = ical` and owned by that one feed. A re-sync only ever adds or
+removes rows it created itself; a host's own manual closures
+(`source = manual`) and another connected feed's rows are never touched, even
+if their dates overlap. `App\Services\Ical\IcalImportService` is the only
+thing that reads or writes those tagged rows.
+
+Run it by hand to check a feed that has started failing, or to sync one
+property immediately after connecting it:
+
+```bash
+php artisan bookings:sync-ical-feeds          # every connected feed
+php artisan bookings:sync-ical-feeds 3        # just ApartmentIcalFeed #3
+```
+
+A feed's last sync time, status and error (if any) are shown next to it on
+the Edit page.
 
 ## How pricing works
 
@@ -172,6 +214,20 @@ A cleaning fee is set per property and charged once per stay.
 Money is formatted by `App\Support\Money`, not `Number::currency()` — the latter
 needs `ext-intl`, which this project's Dockerfile does not install.
 
+### Per-date rate overrides
+
+A property's nightly rate can be overridden for specific dates — a higher
+weekend or peak-season price — from the *Rate calendar* section on its Edit
+page. Set a range, an optional price, and (optionally) limit it to specific
+days of the week, e.g. every Friday and Saturday for the rest of the summer.
+
+A date with no override simply costs the apartment's own `price_per_night`;
+`PricingService::quote()` builds a per-night breakdown (`apartment_rates`,
+falling back to the base rate) and sums it, so a property with no overrides
+at all behaves exactly as it always did. The breakdown is on `Quote`'s
+`nightlyBreakdown` property, for anywhere that wants to show "mixed rate"
+instead of a single nightly figure.
+
 ## Booking lifecycle
 
 ```
@@ -191,7 +247,18 @@ cannot be set independently of them.
 ## Email
 
 Transactional email goes out through **Brevo** over SMTP. Guests are emailed when
-a booking is confirmed or cancelled; the host is emailed when a booking comes in.
+a booking is confirmed or cancelled; the host is emailed when a booking comes in;
+and two scheduled commands reach a guest without anyone sending anything by hand:
+
+- `php artisan bookings:send-arrival-reminders` — the day before check-in on a
+  confirmed booking.
+- `php artisan bookings:send-review-requests` — the day after checkout on a
+  completed, unreviewed booking.
+
+Both are scheduled daily in `routes/console.php` and are idempotent: each
+stamps a `*_sent_at` column on the booking right after sending
+(`arrival_reminder_sent_at`, `review_request_sent_at`), so a missed or
+re-run scheduler tick never sends either one twice for the same stay.
 
 ```ini
 MAIL_MAILER=smtp
@@ -233,6 +300,42 @@ php artisan queue:work          # production, under supervisor or systemd
 after a deploy, this is almost always why; `php artisan mail:check` reports the
 queue connection and how many jobs are waiting.
 
+### The scheduler is equally not optional
+
+The arrival-reminder and review-request commands above, and
+`bookings:sync-ical-feeds`, only fire if something is actually calling Laravel's
+scheduler:
+
+```bash
+php artisan schedule:work        # local development
+```
+
+In production, add one cron entry calling `schedule:run` every minute (the
+usual Laravel setup) — this project's `docker/run.sh` does not start one on its
+own, the same way it does not start a queue worker; both need a process
+alongside the web container.
+
+```cron
+* * * * * cd /var/www/html && php artisan schedule:run >> /dev/null 2>&1
+```
+
+### SMS (optional)
+
+The arrival reminder also sends a text, but only to a guest who has a phone
+number on file, and only once a real SMS provider is configured. With no
+`TWILIO_SID` / `TWILIO_AUTH_TOKEN` / `TWILIO_FROM`, texts are written to the
+log instead of actually sent — `App\Providers\AppServiceProvider` binds
+`App\Services\Sms\LogSmsGateway` rather than throwing, the same "never break
+the page" approach taken with Google sign-in. Set all three to switch to
+`App\Services\Sms\TwilioSmsGateway`, which calls Twilio's REST API directly
+over `Http` rather than pulling in the `twilio/sdk` package.
+
+```ini
+TWILIO_SID=
+TWILIO_AUTH_TOKEN=
+TWILIO_FROM=
+```
+
 ## Storage
 
 Photos are written to the `public` disk and served via `Storage::url()`. If
@@ -255,10 +358,13 @@ comparisons behave differently in tests and production.
 
 ```
 app/
-  Services/          AvailabilityService, PricingService, BookingService
-  Support/           Quote (price breakdown), Money (intl-free formatting)
-  Casts/             DateOnly
-  Http/Requests/     StoreBookingRequest, SearchApartmentsRequest
+  Services/            AvailabilityService, PricingService, BookingService
+  Services/Ical/       IcalExportService, IcalImportService
+  Services/Sms/        SmsGateway, LogSmsGateway, TwilioSmsGateway
+  Support/             Quote (price breakdown), Money (intl-free formatting)
+  Casts/               DateOnly
+  Http/Requests/       StoreBookingRequest, SearchApartmentsRequest
+  Console/Commands/    SyncIcalFeeds, SendArrivalReminders, SendReviewRequests
 resources/
   css/app.css        design tokens + component classes — the only place colour is defined
   views/components/  property-card, score-badge, search-bar, flash

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Apartment;
 use App\Support\Quote;
 use Carbon\CarbonImmutable;
+use Carbon\CarbonPeriod;
 
 /**
  * Works out what a stay costs.
@@ -21,8 +22,14 @@ class PricingService
     {
         $nights = $this->nights($checkIn, $checkOut);
 
-        $nightlyRate = (float) $apartment->price_per_night;
-        $subtotal = $this->round($nightlyRate * $nights);
+        $breakdown = $this->nightlyBreakdown($apartment, $checkIn, $checkOut);
+        $subtotal = $this->round(array_sum($breakdown));
+
+        // The average of what was actually charged, not a second, independent
+        // read of the base rate — so this still equals price_per_night exactly
+        // for the common case of a property with no date overrides at all.
+        $nightlyRate = $nights > 0 ? $this->round($subtotal / $nights) : (float) $apartment->price_per_night;
+
         $cleaningFee = $this->round((float) $apartment->cleaning_fee);
 
         $serviceFee = $this->round(($subtotal + $cleaningFee) * $this->serviceFeeRate());
@@ -38,7 +45,42 @@ class PricingService
             taxes: $taxes,
             total: $this->round($subtotal + $cleaningFee + $serviceFee + $taxes),
             currency: $this->currency(),
+            nightlyBreakdown: $breakdown,
         );
+    }
+
+    /**
+     * The price charged for each individual night of the stay, keyed by
+     * Y-m-d. A date with a matching apartment_rates row costs that override;
+     * every other date falls back to the apartment's own price_per_night, so
+     * a property that has never had an override priced returns exactly what
+     * it always did — nights identical copies of the base rate.
+     *
+     * @return array<string, float>
+     */
+    public function nightlyBreakdown(Apartment $apartment, CarbonImmutable $checkIn, CarbonImmutable $checkOut): array
+    {
+        $baseRate = (float) $apartment->price_per_night;
+
+        // Half-open: the last night of the stay is checkOut minus one day, the
+        // same convention AvailabilityService::unavailableDates() uses for the
+        // nights a booking actually occupies.
+        $lastNight = $checkOut->subDay();
+
+        // One query for the whole stay rather than one per night.
+        $overrides = $apartment->rates()
+            ->whereBetween('date', [$checkIn->toDateString(), $lastNight->toDateString()])
+            ->pluck('price_per_night', 'date')
+            ->map(fn ($price) => (float) $price)
+            ->all();
+
+        $breakdown = [];
+        foreach (CarbonPeriod::create($checkIn, $lastNight) as $night) {
+            $key = $night->toDateString();
+            $breakdown[$key] = $overrides[$key] ?? $baseRate;
+        }
+
+        return $breakdown;
     }
 
     /**

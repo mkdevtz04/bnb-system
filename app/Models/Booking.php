@@ -27,6 +27,8 @@ class Booking extends Model
         'status',
         'confirmed_at',
         'cancelled_at',
+        'arrival_reminder_sent_at',
+        'review_request_sent_at',
     ];
 
     protected function casts(): array
@@ -36,6 +38,8 @@ class Booking extends Model
             'check_out' => DateOnly::class,
             'confirmed_at' => 'datetime',
             'cancelled_at' => 'datetime',
+            'arrival_reminder_sent_at' => 'datetime',
+            'review_request_sent_at' => 'datetime',
             'subtotal' => 'decimal:2',
             'service_fee' => 'decimal:2',
             'taxes' => 'decimal:2',

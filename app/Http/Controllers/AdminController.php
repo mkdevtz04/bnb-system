@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exceptions\DatesUnavailableException;
 use App\Mail\InquiryReplyMail;
 use App\Models\Apartment;
+use App\Models\ApartmentIcalFeed;
 use App\Models\ApartmentImage;
 use App\Models\BlockedDate;
 use App\Models\Booking;
@@ -12,6 +13,7 @@ use App\Models\Inquiry;
 use App\Models\Review;
 use App\Models\User;
 use App\Services\BookingService;
+use App\Services\Ical\IcalImportService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +22,10 @@ use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
 {
-    public function __construct(private readonly BookingService $bookings) {}
+    public function __construct(
+        private readonly BookingService $bookings,
+        private readonly IcalImportService $icalImporter,
+    ) {}
 
     public function dashboard()
     {
@@ -212,7 +217,7 @@ class AdminController extends Controller
     public function editApartment(Apartment $apartment)
     {
         return view('admin.apartments.edit', [
-            'apartment' => $apartment->load('images', 'blockedDates'),
+            'apartment' => $apartment->load('images', 'blockedDates', 'icalFeeds'),
         ]);
     }
 
@@ -304,6 +309,55 @@ class AdminController extends Controller
         $blockedDate->delete();
 
         return back()->with('success', 'Night reopened.');
+    }
+
+    /**
+     * Point a property at an external calendar (an Airbnb listing's export
+     * URL, a VRBO feed, ...). The first sync runs immediately so the host
+     * finds out right away if the URL is wrong, rather than an hour later.
+     */
+    public function storeIcalFeed(Request $request, Apartment $apartment)
+    {
+        $validated = $request->validate([
+            'label' => ['required', 'string', 'max:60'],
+            'url' => ['required', 'url', 'max:2048'],
+        ]);
+
+        $feed = $apartment->icalFeeds()->create($validated);
+
+        try {
+            $this->icalImporter->sync($feed);
+
+            return back()->with('success', "{$feed->label} connected and synced.");
+        } catch (\Throwable $e) {
+            report($e);
+
+            return back()->with('success', "{$feed->label} connected, but the first sync failed: {$e->getMessage()}");
+        }
+    }
+
+    public function syncIcalFeed(ApartmentIcalFeed $feed)
+    {
+        try {
+            $this->icalImporter->sync($feed);
+
+            return back()->with('success', "{$feed->label} synced.");
+        } catch (\Throwable $e) {
+            report($e);
+
+            return back()->withErrors(['ical' => "{$feed->label} could not be synced: {$e->getMessage()}"]);
+        }
+    }
+
+    public function destroyIcalFeed(ApartmentIcalFeed $feed)
+    {
+        // The dates this feed mirrored in are no longer backed by anything;
+        // a host's own manual blocks (source = manual) are a different row
+        // entirely and are never touched here.
+        BlockedDate::fromIcal($feed->id)->delete();
+        $feed->delete();
+
+        return back()->with('success', 'Calendar disconnected.');
     }
 
     /**

@@ -68,6 +68,11 @@
                             <i class="fa-solid fa-pen"></i> Edit
                         </a>
 
+                        <a href="{{ route('admin.apartments.edit', $apartment) }}#connected-calendars"
+                           class="btn btn-ghost btn-sm">
+                            <i class="fa-solid fa-calendar-days"></i> Calendar
+                        </a>
+
                         <form method="POST" action="{{ route('admin.apartments.toggle-status', $apartment) }}">
                             @csrf @method('PATCH')
                             <button class="btn btn-ghost btn-sm">

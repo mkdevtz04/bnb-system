@@ -22,7 +22,25 @@ class Quote implements Arrayable
         public readonly float $taxes,
         public readonly float $total,
         public readonly string $currency,
+        /**
+         * Price actually charged for each night of the stay, keyed by Y-m-d.
+         * Equal to $nightlyRate on every key for a property with no date
+         * overrides; $nightlyRate itself stays the simple average, so every
+         * existing single-figure display keeps working unchanged.
+         *
+         * @var array<string, float>
+         */
+        public readonly array $nightlyBreakdown = [],
     ) {}
+
+    /**
+     * Whether any night of this stay was priced differently from another —
+     * the cue for a view to show a breakdown instead of "$X x N nights".
+     */
+    public function hasVariableRate(): bool
+    {
+        return count(array_unique($this->nightlyBreakdown)) > 1;
+    }
 
     /**
      * The columns this quote contributes to a bookings row.
@@ -52,6 +70,7 @@ class Quote implements Arrayable
             'taxes' => $this->taxes,
             'total' => $this->total,
             'currency' => $this->currency,
+            'nightly_breakdown' => $this->nightlyBreakdown,
         ];
     }
 }

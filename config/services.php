@@ -35,4 +35,22 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Twilio (SMS)
+    |--------------------------------------------------------------------------
+    |
+    | Optional. With any of these blank, App\Providers\AppServiceProvider binds
+    | App\Services\Sms\LogSmsGateway instead, and arrival-reminder texts are
+    | written to the log rather than sent — the app never breaks for lack of
+    | an SMS account, it just doesn't send real texts yet.
+    |
+    */
+
+    'twilio' => [
+        'sid' => env('TWILIO_SID'),
+        'auth_token' => env('TWILIO_AUTH_TOKEN'),
+        'from' => env('TWILIO_FROM'),
+    ],
+
 ];
