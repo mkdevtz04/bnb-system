@@ -208,10 +208,16 @@ class AdminController extends Controller
     {
         $apartment = Apartment::create($this->validateApartment($request));
 
-        $this->storeImages($request, $apartment);
+        $failed = $this->storeImages($request, $apartment);
 
-        return redirect()->route('admin.apartments')
-            ->with('success', "{$apartment->name} is live.");
+        $redirect = redirect()->route('admin.apartments')->with('success', "{$apartment->name} is live.");
+
+        // withErrors([]) still flashes an empty error bag, and
+        // assertSessionHasNoErrors() (rightly) treats that as a failure —
+        // the session key must be genuinely absent, not merely empty.
+        return $failed > 0
+            ? $redirect->withErrors(['images' => $this->uploadFailureMessage($failed)])
+            : $redirect;
     }
 
     public function editApartment(Apartment $apartment)
@@ -225,10 +231,13 @@ class AdminController extends Controller
     {
         $apartment->update($this->validateApartment($request));
 
-        $this->storeImages($request, $apartment);
+        $failed = $this->storeImages($request, $apartment);
 
-        return redirect()->route('admin.apartments')
-            ->with('success', "{$apartment->name} updated.");
+        $redirect = redirect()->route('admin.apartments')->with('success', "{$apartment->name} updated.");
+
+        return $failed > 0
+            ? $redirect->withErrors(['images' => $this->uploadFailureMessage($failed)])
+            : $redirect;
     }
 
     public function destroyApartment(Apartment $apartment)
@@ -398,17 +407,45 @@ class AdminController extends Controller
         ]);
     }
 
-    private function storeImages(Request $request, Apartment $apartment): void
+    /**
+     * @return int How many of the uploaded files failed to actually write.
+     *
+     * The public disk is configured with 'throw' => false (see
+     * config/filesystems.php), so a write that fails — wrong ownership on
+     * storage/app/public being the usual cause — returns false rather than
+     * throwing. This used to be saved anyway: a false image_path became an
+     * ApartmentImage row pointing at nothing, so the admin saw "success" while
+     * the photo silently never existed. Every path is now checked before it
+     * is trusted with a database row.
+     */
+    private function storeImages(Request $request, Apartment $apartment): int
     {
         if (! $request->hasFile('images')) {
-            return;
+            return 0;
         }
 
+        $failed = 0;
+
         foreach ($request->file('images') as $image) {
-            $apartment->images()->create([
-                'image_path' => $image->store('apartments', $this->disk()),
-            ]);
+            $path = $image->store('apartments', $this->disk());
+
+            if ($path === false) {
+                $failed++;
+
+                continue;
+            }
+
+            $apartment->images()->create(['image_path' => $path]);
         }
+
+        return $failed;
+    }
+
+    private function uploadFailureMessage(int $failed): string
+    {
+        return $failed === 1
+            ? '1 photo could not be saved — the server could not write to storage. Check its file permissions.'
+            : "{$failed} photos could not be saved — the server could not write to storage. Check its file permissions.";
     }
 
     private function deleteImageFile(ApartmentImage $image): void
